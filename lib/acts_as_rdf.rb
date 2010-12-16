@@ -10,29 +10,28 @@ module ActsAsRDF
   module ClassMethods
     def acts_as_rdf
       class_eval <<-STUFF
-#      include ActiveModel::Conversion
       attr_reader :uri, :context
+      
+      # RDFのリソースであるクラスを生成する
+      #  project = RDF::URI.new('http://project.com/')
+      #  RDFModel.new(RDF::URI.new('http://project.com/one_page'), project.context)
+      #
+      # === 引数
+      # +uri+::
+      #  RDF::URI
+      # +context+::
+      #  RDF::URI (通常は Project#context の値)
+      #
+      # === 返り値
+      # RDFModel
+      def initialize(uri, context)
+        raise unless uri && context
+        @uri = uri
+        @context = context
+      end
       STUFF
     end
 
-    # RDFのリソースであるクラスを生成する
-    #  project = RDF::URI.new('http://project.com/')
-    #  RDFModel.new(RDF::URI.new('http://project.com/one_page'), project.context)
-    #
-    # === 引数
-    # +uri+::
-    #  RDF::URI
-    # +context+::
-    #  RDF::URI (通常は Project#context の値)
-    #
-    # === 返り値
-    # RDFModel
-    def initialize(uri, context)
-      raise if uri.blank? || context.blank?
-      @uri = uri
-      @context = context
-    end
-    
     # RDFのリソースであるクラスを生成する
     #
     # === 引数
@@ -44,7 +43,6 @@ module ActsAsRDF
     # === 返り値
     # RDFModel
     def parse(id_str, context)
-      raise if id_str.blank? || context.blank?
       self.new(self.decode_uri(id_str), context)
     end
     
@@ -74,7 +72,6 @@ module ActsAsRDF
   end
   
   module InstanceMethods    
-
     # このクラスの識別子を返す。
     # 識別子は、URIを16進文字列で表現した文字列である。
     #
