@@ -4,117 +4,107 @@ include ActsAsRDF
 
 describe 'ActsAsRDF' do
   before do
-    @uri = RDF::URI.new('http://example.com')
+    @alice_uri = RDF::URI.new('http://ali.ce')
+    @alice_name = RDF::Literal.new('Alice')
+    @alice_blog = RDF::URI.new('htt://alice.blog.com')
+    
+    @bob_uri = RDF::URI.new('http://bob.com')
+
     @context = RDF::URI.new('http://context.com')
-    @literal = RDF::Literal.new('obj')
-    @literal2 = RDF::Literal.new('context2')
-    @resource = RDF::URI.new('http://hoge.com')
 
-    repository = RDF::Repository.new 
-    repository << RDF::Statement.new(@uri, RDF::FOAF["name"], @literal)
-    repository << RDF::Statement.new(@uri, RDF::FOAF["name"], @literal2, :context => @context)
-    repository << RDF::Statement.new(@uri, RDF::FOAF["knows"], @resource, :context => @context)
-    ActsAsRDF.repository = repository
-
+    ActsAsRDF.repository = RDF::Repository.new{|r|
+      r << [@alice_uri, RDF::FOAF.name, 'wrong_name']
+      r << [@alice_uri, RDF::FOAF.name, @alice_name, {:context => @context}]
+      r << [@alice_uri, RDF::FOAF.homepage, @alice_blog, {:context => @context}]
+      r << [@alice_uri, RDF::FOAF.knows, @bob_uri, {:context => @context}]
+    }
+    
     class Person
       acts_as_rdf
     end
 
   end
 
-  it "should convert uri" do
-    Person.encode_uri(@uri).should be_true
-  end
-  
-  it "should be not created" do
-    lambda{ Person.new }.should raise_error(ArgumentError)
+  it "should has repository" do
+    rep = ActsAsRDF.repository
+    rep.should be_instance_of RDF::Repository
+    rep.has_statement?(
+      RDF::Statement.new(@alice_uri, RDF::FOAF.name, @alice_name, :context => @context)).should be_true
+
+    rep.should == Person.repository
   end
 
   it "should be created" do
-    Person.new(@uri, @context).should be_true
+    Person.new(@alice_uri, @context).should be_true
   end
 
-  it "should use has_literals" do
-    class Person2
-      acts_as_rdf
-      has_objects :names, RDF::FOAF[:name]
-    end
-    Person2.new(@uri,@context).names.should be_instance_of(Array)
+  it "should be not created" do
+    lambda{ Person.new }.should raise_error(ArgumentError)
+    lambda{ Person.new(@alice_uri) }.should raise_error(ArgumentError)
   end
 
-  it "should return correct literals" do  
-    class Person2
-      acts_as_rdf
-      has_objects :names, RDF::FOAF[:name]
-    end
-
-    person2 = Person2.new(@uri,@context)
-    person2.names.first.should be_equal(@literal2)
-    person2.names.size.should be_equal(1)
+  it "should convert uri" do
+    Person.encode_uri(@alice_uri).should be_true
   end
 
-  it "should use has_resources" do
-    class Person3
-      acts_as_rdf
-      has_objects :people, RDF::FOAF[:knows]
-    end
-    Person3.new(@uri,@context).people.should be_instance_of(Array)
-  end
-
-  it "should return correct resoueces" do  
-    class Person3
-      acts_as_rdf
-      has_objects :people, RDF::FOAF[:knows]
+  context 'use has_objects' do
+    before do
+      class Person2
+        acts_as_rdf
+        has_objects :names, RDF::FOAF.name
+        has_objects :homepages, RDF::FOAF.homepage
+        has_objects :people, RDF::FOAF.knows, 'Person'
+      end
+      @alice = Person2.new(@alice_uri, @context)
     end
 
-    person3 = Person3.new(@uri,@context)
-    person3.people.first.should be_equal(@resource)
-    person3.people.size.should be_equal(1)
-  end
-
-  it "should return correct resoueces with class" do  
-    class Person3
-      acts_as_rdf
-      has_objects :people, RDF::FOAF[:knows], "Person"
+    it "should return array" do
+      @alice.names.should  be_instance_of(Array)
+      @alice.homepages.should be_instance_of(Array)
+      @alice.people.should be_instance_of(Array)
     end
-    person3 = Person3.new(@uri, @context)
-    person = person3.people.first
-    person.should be_instance_of(Person)
-    person.uri.should be_equal(@resource)
-    person.context.should be_equal(@context)
-  end
-
-  it "should return correct sujects" do  
-    class Person3
-      acts_as_rdf
-      has_subjects :people, RDF::FOAF[:knows]
+    
+    it "should return correct literals" do  
+      @alice.names.size.should be_equal(1)
+      @alice.names.first.should be_equal(@alice_name)
     end
-
-    person3 = Person3.new(@resource,@context)
-    person3.people.first.should be_equal(@uri)
-    person3.people.size.should be_equal(1)
-  end
-
-  it "should return correct resoueces with class" do  
-    class Person3
-      acts_as_rdf
-      has_subjects :people, RDF::FOAF[:knows], "Person"
+    
+    it "should return correct resoueces" do  
+      @alice.homepages.size.should be_equal(1)
+      @alice.homepages.first.should be_equal(@alice_blog)
     end
-    person3 = Person3.new(@resource, @context)
-    person = person3.people.first
-    person.should be_instance_of(Person)
-    person.uri.should be_equal(@uri)
-    person.context.should be_equal(@context)
-  end
-
-  it "should has repository" do
-    Person.repository.should be_instance_of RDF::Repository
-    Person.repository.has_statement?(RDF::Statement.new(RDF::URI.new('http://example.com'), RDF::FOAF["name"], "obj")).should be_true
-
-    class Person2
-      acts_as_rdf
+    
+    it "should return correct resoueces with class" do  
+      bob = @alice.people.first
+      bob.should be_instance_of(Person)
+      bob.uri.should be_equal(@bob_uri)
+      bob.context.should be_equal(@context)
     end
-    Person.repository.should == Person2.repository
   end
 
+  context 'use has_subjects' do  
+    it "should return correct sujects" do  
+      class Person3
+        acts_as_rdf
+        has_subjects :people, RDF::FOAF[:knows]
+      end
+
+      bob = Person3.new(@bob_uri, @context)
+      bob.people.first.should be_equal(@alice_uri)
+      bob.people.size.should be_equal(1)
+    end
+    
+    it "should return correct resoueces with class" do  
+      class Blog
+        acts_as_rdf
+        has_subjects :authors, RDF::FOAF.homepage, "Person"
+      end
+
+      blog = Blog.new(@alice_blog, @context)
+      alice = blog.authors.first
+      alice.should be_instance_of(Person)
+      alice.uri.should be_equal(@alice_uri)
+      alice.context.should be_equal(@context)
+    end
+  end
 end
