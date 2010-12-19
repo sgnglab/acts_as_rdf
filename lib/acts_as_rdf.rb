@@ -2,9 +2,9 @@ module ActsAsRDF
 
   def self.included(base)
     base.extend ClassMethods
-    base.class_eval do
-      include InstanceMethods
-    end
+#    base.class_eval do
+#      include InstanceMethods
+#    end
   end
 
   @@repository = nil
@@ -19,28 +19,45 @@ module ActsAsRDF
   end
 
   module ClassMethods
-    def acts_as_rdf
+    def acts_as_rdf(option={:only_repository => true})
+
+      class_eval do
+        include InstanceMethods
+      end
+
       class_eval <<-STUFF
       attr_reader :uri, :context
+      STUFF
       
-      # RDFのリソースであるクラスを生成する
-      #  project = RDF::URI.new('http://project.com/')
-      #  RDFModel.new(RDF::URI.new('http://project.com/one_page'), project.context)
-      #
-      # === 引数
-      # +uri+::
-      #  RDF::URI
-      # +context+::
-      #  RDF::URI (通常は Project#context の値)
-      #
-      # === 返り値
-      # RDFModel
-      def initialize(uri, context)
-        raise unless uri && context
-        @uri = uri
-        @context = context
+      if option[:only_repository]
+        class_eval do
+          include InstanceMethodsForOnlyRDFRepository
+        end
+
+        class_eval <<-STUFF
+        # RDFのリソースであるクラスを生成する
+        #  project = RDF::URI.new('http://project.com/')
+        #  RDFModel.new(RDF::URI.new('http://project.com/one_page'), project.context)
+        #
+        # === 引数
+        # +uri+::
+        #  RDF::URI
+        # +context+::
+        #  RDF::URI (通常は Project#context の値)
+        #
+        # === 返り値
+        # RDFModel
+        def initialize(uri, context)
+          raise unless uri && context
+          @uri = uri
+          @context = context
+        end
+        STUFF
+      else
+        class_eval <<-STUFF
+        attr_writer :uri, :context
+        STUFF
       end
-    STUFF
     end
 
     # RDFのリソースであるクラスを生成する
@@ -107,26 +124,36 @@ module ActsAsRDF
   end 
 
   module InstanceMethods    
-    # このクラスの識別子を返す。
-    # 識別子は、URIを16進文字列で表現した文字列である。
+    # URIを16進文字列で表現した文字列を返す
+    #
+    # === 返り値
+    #  String
+    def encode_uri
+      self.class.encode_uri(uri)
+    end
+  end
+
+  module InstanceMethodsForOnlyRDFRepository
+    # このクラスの識別子を返す
+    # 識別子は、URIを16進文字列で表現した文字列である
     #
     # === 返り値
     #  String
     def id
-      self.class.encode_uri(uri)
+      encode_uri
     end
-    
+
     private
     
-    # このクラスの識別子を返す
-    # 識別子は、URIを16進文字列で表現した文字列である
+    # 永続するデータかどうかの確認
+    # このクラスのものはRDF::Repositoryに保存されるはずなので
+    # trueを返す
     #
     # === 返り値
     # true
     def persisted?
       true
     end
-
   end
 end
 

@@ -1,13 +1,21 @@
 ActsAsRdf
 =========
 
-Introduction goes here.
+ActiveModelのクラスにRDFのゲッターを加えるライブラリ
 
 
 Example
 =======
 
-Example goes here.
+include ActsAsRDF
+ActsAsRDF.repository = RDF::Repository
 
+class Person
+  acts_as_rdf
+end
+
+class Book < ActiveRecord::Base
+  acts_as_rdf :only_repository => false
+end
 
 Copyright (c) 2010 [name of plugin creator], released under the MIT license

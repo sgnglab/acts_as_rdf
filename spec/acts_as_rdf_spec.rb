@@ -43,10 +43,28 @@ describe 'ActsAsRDF' do
     lambda{ Person.new(@alice_uri) }.should raise_error(ArgumentError)
   end
 
-  it "should convert uri" do
-    Person.encode_uri(@alice_uri).should be_true
+  it "should be return serialized uri" do
+    alice = Person.new(@alice_uri, @context)
+    alice.id.should == Person.encode_uri(@alice_uri)
+    alice.id.should == alice.encode_uri
   end
 
+  context 'not only repository' do
+    before do
+      class Person1
+        acts_as_rdf :only_repository => false
+      end
+      @alice = Person1.new
+      @alice.uri = @alice_uri
+      @alice.context = @context
+    end
+
+    it 'return object_id' do
+      @alice.id.should_not == Person1.encode_uri(@alice_uri)
+      @alice.id.should_not == @alice.encode_uri
+    end
+  end
+  
   context 'use has_objects' do
     before do
       class Person2
