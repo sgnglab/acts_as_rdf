@@ -14,7 +14,7 @@ module ActsAsRDF
   end
 
   def repository=(repository)
-    raise unless repository.instance_of?(RDF::Repository)
+    raise unless repository.kind_of?(RDF::Repository)
     @@repository = repository
   end
 

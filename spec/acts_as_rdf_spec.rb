@@ -34,6 +34,11 @@ describe 'ActsAsRDF' do
     rep.should == Person.repository
   end
 
+  it "should has kind of repository" do
+    class MyRepository < RDF::Repository; end
+    ActsAsRDF.repository = MyRepository.new
+  end
+
   it "should be created" do
     Person.new(@alice_uri, @context).should be_true
   end
