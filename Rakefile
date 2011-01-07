@@ -1,17 +1,13 @@
 require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
+require 'rspec/core/rake_task'
 
 desc 'Default: run unit tests.'
-task :default => :test
+task :default => :spec
 
 desc 'Test the acts_as_rdf plugin.'
-Rake::TestTask.new(:test) do |t|
-  t.libs << 'lib'
-  t.libs << 'spec'
-  t.pattern = 'spec/**/*_spec.rb'
-  t.verbose = true
-end
+RSpec::Core::RakeTask.new(:spec)
 
 desc 'Generate documentation for the acts_as_rdf plugin.'
 Rake::RDocTask.new(:rdoc) do |rdoc|
