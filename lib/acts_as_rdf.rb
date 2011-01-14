@@ -131,6 +131,16 @@ module ActsAsRDF
           end
         }
       end
+     
+      define_method("#{method_name}=") do |objects|
+        send(method_name).each do |object|
+          object = object.uri if class_name
+          repository.delete([uri, property, object, {:context => context}])
+        end
+        objects.each do |object|
+          repository.insert([uri, property, object, {:context => context}])
+        end
+      end
     end
 
     def has_subjects(method_name, property, class_name=nil)
@@ -158,6 +168,10 @@ module ActsAsRDF
 
     def define_type(new_type)
       add_type(self, new_type)
+    end
+
+    def create(context)
+      self.new(uniq_uri,context) 
     end
   end 
 

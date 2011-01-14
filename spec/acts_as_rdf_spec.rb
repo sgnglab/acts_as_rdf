@@ -196,4 +196,34 @@ describe 'ActsAsRDF' do
       ActsAsRDF.uniq_uri.should_not == uri1
     end
   end
+
+  context 'create resource' do
+    it 'should create resource' do
+      Person.create(@context).should be_instance_of Person
+    end
+    it 'should not create resource' do
+      lambda{ PersonFind.create }.should raise_error(ArgumentError)
+    end
+  end
+<<<<<<< HEAD
+
+  context 'update resource' do
+    before do
+      class Person
+        acts_as_rdf
+        define_type RDF::FOAF['Person']
+        has_objects :people, RDF::FOAF[:knows]
+      end
+    end
+    it 'should update subject' do
+      alice = Person.find(@alice_uri,@context)
+      alice_people = alice.people
+      alice.people = [@alice_uri, @bob_uri]
+      alice.people.size.should == 2
+      alice.people.should include @alice_uri
+      alice.people.should include @bob_uri
+    end
+  end
+=======
+>>>>>>> 29c8182... リソースの作成機能を実装
 end
