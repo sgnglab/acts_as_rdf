@@ -205,7 +205,6 @@ describe 'ActsAsRDF' do
       lambda{ PersonFind.create }.should raise_error(ArgumentError)
     end
   end
-<<<<<<< HEAD
 
   context 'update resource' do
     before do
@@ -224,6 +223,4 @@ describe 'ActsAsRDF' do
       alice.people.should include @bob_uri
     end
   end
-=======
->>>>>>> 29c8182... リソースの作成機能を実装
 end
