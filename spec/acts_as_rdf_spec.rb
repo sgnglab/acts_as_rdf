@@ -18,14 +18,17 @@ describe 'ActsAsRDF' do
       r << [@alice_uri, RDF::FOAF.homepage, @alice_blog, {:context => @context}]
       r << [@alice_uri, RDF::FOAF.knows, @bob_uri, {:context => @context}]
       r << [@alice_uri, RDF.type, RDF::FOAF['Person'], {:context => @context}]
+      r << [@bob_uri, RDF.type, RDF::FOAF['Person'], {:context => @context}]
+      r << [@alice_blog, RDF.type, RDF::FOAF['Document'], {:context => @context}]
     }
     
     class Person
       acts_as_rdf
+      define_type RDF::FOAF['Person']
     end
   end
 
-  context 'newをfindにする' do
+  context 'find' do
    before do
      class PersonFind
       acts_as_rdf
@@ -84,16 +87,16 @@ describe 'ActsAsRDF' do
   end
 
   it "should be created" do
-    Person.new(@alice_uri, @context).should be_true
+    Person.find(@alice_uri, @context).should be_true
   end
 
   it "should be not created" do
-    lambda{ Person.new }.should raise_error(ArgumentError)
-    lambda{ Person.new(@alice_uri) }.should raise_error(ArgumentError)
+    lambda{ Person.find }.should raise_error(ArgumentError)
+    lambda{ Person.find(@alice_uri) }.should raise_error(ArgumentError)
   end
 
   it "should be return serialized uri" do
-    alice = Person.new(@alice_uri, @context)
+    alice = Person.find(@alice_uri, @context)
     alice.id.should == Person.encode_uri(@alice_uri)
     alice.id.should == alice.encode_uri
   end
@@ -120,11 +123,12 @@ describe 'ActsAsRDF' do
     before do
       class Person2
         acts_as_rdf
+        define_type RDF::FOAF['Person']
         has_objects :names, RDF::FOAF.name
         has_objects :homepages, RDF::FOAF.homepage
         has_objects :people, RDF::FOAF.knows, 'Person'
       end
-      @alice = Person2.new(@alice_uri, @context)
+      @alice = Person2.find(@alice_uri, @context)
     end
 
     it "should return array" do
@@ -155,10 +159,11 @@ describe 'ActsAsRDF' do
     it "should return correct sujects" do  
       class Person3
         acts_as_rdf
+        define_type RDF::FOAF['Person']
         has_subjects :people, RDF::FOAF[:knows]
       end
 
-      bob = Person3.new(@bob_uri, @context)
+      bob = Person3.find(@bob_uri, @context)
       bob.people.first.should be_equal(@alice_uri)
       bob.people.size.should be_equal(1)
     end
@@ -166,10 +171,11 @@ describe 'ActsAsRDF' do
     it "should return correct resoueces with class" do  
       class Blog
         acts_as_rdf
+        define_type RDF::FOAF['Document']
         has_subjects :authors, RDF::FOAF.homepage, "Person"
       end
 
-      blog = Blog.new(@alice_blog, @context)
+      blog = Blog.find(@alice_blog, @context)
       alice = blog.authors.first
       alice.should be_instance_of(Person)
       alice.uri.should be_equal(@alice_uri)
