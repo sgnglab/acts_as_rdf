@@ -182,4 +182,18 @@ describe 'ActsAsRDF' do
       alice.context.should be_equal(@context)
     end
   end
+
+  context 'generate uniq_uri' do
+    it "should return RDF:URI" do
+      ActsAsRDF.uniq_uri.should be_instance_of(RDF::URI)
+    end
+    it "should return new uniq uri if uri confricted" do
+      module ActsAsRDF
+        @@rand_place = 1
+      end
+      uri1 = ActsAsRDF.uniq_uri
+      ActsAsRDF.repository.insert([uri1, RDF.type, RDF::FOAF['Document']])
+      ActsAsRDF.uniq_uri.should_not == uri1
+    end
+  end
 end

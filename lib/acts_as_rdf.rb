@@ -7,6 +7,7 @@ module ActsAsRDF
 #    end
   end
 
+  @@rand_place = 10000 # ユニークURIの最大値
   @@repository = nil
   @@all_type = {}
 
@@ -25,6 +26,20 @@ module ActsAsRDF
 
   def add_type(class_name,new_type)
     @@all_type[class_name] = new_type
+  end
+
+  def uniq_uri
+    uri = RDF::URI.new("http://iris.slis.tsukuba.ac.jp/" + rand(@@rand_place
+).to_s)
+    res = repository.query([uri, nil, nil]).map |
+          repository.query([nil, uri, nil]).map |
+          repository.query([nil, nil, uri]).map
+    if res.empty?
+      uri
+    else
+      @@rand_place += 10
+      uniq_uri
+    end
   end
 
   module ClassMethods
