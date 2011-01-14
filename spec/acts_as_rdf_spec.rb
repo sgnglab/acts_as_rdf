@@ -98,6 +98,7 @@ describe 'ActsAsRDF' do
     alice.id.should == alice.encode_uri
   end
 
+=begin
   context 'not only repository' do
     before do
       class Person1
@@ -113,6 +114,7 @@ describe 'ActsAsRDF' do
       @alice.id.should_not == @alice.encode_uri
     end
   end
+=end
   
   context 'use has_objects' do
     before do

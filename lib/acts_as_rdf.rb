@@ -28,7 +28,7 @@ module ActsAsRDF
   end
 
   module ClassMethods
-    def acts_as_rdf(option={:only_repository => true})
+    def acts_as_rdf#(option={:only_repository => true})
       class_eval do
         include InstanceMethods
       end
@@ -37,7 +37,7 @@ module ActsAsRDF
       attr_reader :uri, :context
       STUFF
       
-      if option[:only_repository]
+#      if option[:only_repository]
         class_eval do
           include InstanceMethodsForOnlyRDFRepository
         end
@@ -61,11 +61,11 @@ module ActsAsRDF
           @context = context
         end
         STUFF
-      else
-        class_eval <<-STUFF
-        attr_writer :uri, :context
-        STUFF
-      end
+#      else
+#        class_eval <<-STUFF
+#        attr_writer :uri, :context
+#        STUFF
+#      end
     end
 
     # RDFのリソースであるクラスを生成する
