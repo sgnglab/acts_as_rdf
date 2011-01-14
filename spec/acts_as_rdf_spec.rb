@@ -199,7 +199,10 @@ describe 'ActsAsRDF' do
 
   context 'create resource' do
     it 'should create resource' do
-      Person.create(@context).should be_instance_of Person
+      person = Person.create(@context)
+      person.should be_instance_of Person
+      res = Person.find(person.uri, @context)
+      res.should be_true
     end
     it 'should not create resource' do
       lambda{ PersonFind.create }.should raise_error(ArgumentError)
@@ -213,6 +216,11 @@ describe 'ActsAsRDF' do
         define_type RDF::FOAF['Person']
         has_objects :people, RDF::FOAF[:knows]
       end
+      class Blog
+        acts_as_rdf
+        define_type RDF::FOAF['Document']
+        has_subjects :authors, RDF::FOAF[:homepage]
+      end
     end
     it 'should update subject' do
       alice = Person.find(@alice_uri,@context)
@@ -221,6 +229,13 @@ describe 'ActsAsRDF' do
       alice.people.size.should == 2
       alice.people.should include @alice_uri
       alice.people.should include @bob_uri
+    end
+    it 'should update subject' do
+      blog = Blog.find(@alice_blog,@context)
+      blog.authors = [@alice_uri, @bob_uri]
+      blog.authors.size.should == 2
+      blog.authors.should include @alice_uri
+      blog.authors.should include @bob_uri
     end
   end
 end

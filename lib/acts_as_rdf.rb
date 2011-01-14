@@ -153,6 +153,16 @@ module ActsAsRDF
           end
         }
       end
+
+      define_method("#{method_name}=") do |resources|
+        send(method_name).each do |resource|
+          resource = resource.uri if class_name
+          repository.delete([resource, property, uri, {:context => context}])
+        end
+        resources.each do |resource|
+          repository.insert([resource, property, uri, {:context => context}])
+        end
+      end
     end
 
     def find(uri, context)
@@ -171,7 +181,9 @@ module ActsAsRDF
     end
 
     def create(context)
-      self.new(uniq_uri,context) 
+      uri = uniq_uri
+      repository.insert([uri, RDF.type, self.type, {:context => context}])
+      self.new(uri,context)
     end
   end 
 
