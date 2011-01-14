@@ -8,6 +8,7 @@ module ActsAsRDF
   end
 
   @@repository = nil
+  @@all_type = {}
 
   def repository
     @@repository
@@ -18,9 +19,16 @@ module ActsAsRDF
     @@repository = repository
   end
 
+  def all_type
+    @@all_type
+  end
+
+  def add_type(class_name,new_type)
+    @@all_type[class_name] = new_type
+  end
+
   module ClassMethods
     def acts_as_rdf(option={:only_repository => true})
-
       class_eval do
         include InstanceMethods
       end
@@ -121,6 +129,21 @@ module ActsAsRDF
         }
       end
     end
+
+    def find(uri, context)
+      res = repository.query([uri, RDF.type, type, {:context => context}]).map do |x| end
+      res.empty? ? nil : self.new(uri, context)
+#      self.new(uri, context) if repository.query([uri, RDF.type, type, {:context => context}])
+    end
+
+    def type
+      raise ActsAsRDF::NoTypeError unless all_type[self]
+      all_type[self]
+    end
+
+    def define_type(new_type)
+      add_type(self, new_type)
+    end
   end 
 
   module InstanceMethods    
@@ -154,6 +177,9 @@ module ActsAsRDF
     def persisted?
       true
     end
+  end
+
+  class NoTypeError < StandardError
   end
 end
 

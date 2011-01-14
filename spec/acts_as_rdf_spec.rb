@@ -17,13 +17,57 @@ describe 'ActsAsRDF' do
       r << [@alice_uri, RDF::FOAF.name, @alice_name, {:context => @context}]
       r << [@alice_uri, RDF::FOAF.homepage, @alice_blog, {:context => @context}]
       r << [@alice_uri, RDF::FOAF.knows, @bob_uri, {:context => @context}]
+      r << [@alice_uri, RDF.type, RDF::FOAF['Person'], {:context => @context}]
     }
     
     class Person
       acts_as_rdf
     end
-
   end
+
+  context 'newをfindにする' do
+   before do
+     class PersonFind
+      acts_as_rdf
+      define_type RDF::FOAF['Person'] 
+     end
+   end
+ 
+   it "can call find method" do
+      PersonFind.find(@alice_uri, @context).should be_instance_of PersonFind
+      PersonFind.find(RDF::FOAF.name, @context).should be_instance_of NilClass
+   end
+
+   it "cannot call find method" do
+      lambda{ PersonFind.find }.should raise_error(ArgumentError)
+      lambda{ PersonFind.find(@alice_uri) }.should raise_error(ArgumentError)
+   end   
+  end
+
+  context 'type' do
+    context "if it didn't define type"do
+      it "raises error" do
+        class NoType
+          acts_as_rdf
+        end
+        lambda{ NoType.type }.should raise_error(ActsAsRDF::NoTypeError)
+      end
+    end
+
+    it "can set type" do
+#      Person.find(@alice_uri, @context).type.should be_instance_of RDF::URI
+      class Person3
+        acts_as_rdf
+        define_type RDF::FOAF['Person3']
+      end
+      class Person2
+        acts_as_rdf
+        define_type RDF::FOAF['Person2']
+      end
+      Person3.type.should == RDF::FOAF['Person3']
+    end
+  end
+
 
   it "should has repository" do
     rep = ActsAsRDF.repository
