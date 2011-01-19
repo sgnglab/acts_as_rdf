@@ -2,14 +2,14 @@ module ActsAsRDF
 
   def self.included(base)
     base.extend ClassMethods
-#    base.class_eval do
-#      include InstanceMethods
-#    end
+    base.class_eval do
+      include InstanceMethods
+    end
   end
 
   @@rand_place = 10000 # ユニークURIの最大値
   @@repository = nil
-  @@all_type = {}
+  @@all_type = {} # このライブラリを使用するRubyクラスのRDFクラスを格納する
 
   def repository
     @@repository
@@ -20,20 +20,41 @@ module ActsAsRDF
     @@repository = repository
   end
 
+  # Rubyクラスとそれに紐づけられたRDFクラスをすべて返す
+  #
+  # === 返り値
+  # Hash
   def all_type
     @@all_type
   end
 
+  # RubyクラスにRDFクラスを紐づける
+  #
+  # === 引数
+  # +class_name+::
+  #  クラス名
+  # +new_type+::
+  #  RDF::URI (クラスに紐づけるURI)
+  #
+  # === 返り値
+  # Hash
   def add_type(class_name,new_type)
     @@all_type[class_name] = new_type
   end
 
+  # repositoryに登録されていないURIを返す
+  # このURIはrepositoryの全contextを通してuniqである
+  #
+  # === 返り値
+  # RDF::URI
   def uniq_uri
-    uri = RDF::URI.new("http://iris.slis.tsukuba.ac.jp/" + rand(@@rand_place
-).to_s)
-    res = repository.query([uri, nil, nil]).map |
-          repository.query([nil, uri, nil]).map |
-          repository.query([nil, nil, uri]).map
+    uri = RDF::URI.new("http://iris.slis.tsukuba.ac.jp/" + rand(@@rand_place).to_s)
+    res =
+      [[uri, nil, nil],
+       [nil, uri, nil],
+       [nil, nil, uri]].inject([]){|sum, q|
+      sum |= repository.query(q).map
+    }
     if res.empty?
       uri
     else
@@ -43,44 +64,28 @@ module ActsAsRDF
   end
 
   module ClassMethods
-    def acts_as_rdf#(option={:only_repository => true})
-      class_eval do
-        include InstanceMethods
-      end
-
+    def acts_as_rdf
       class_eval <<-STUFF
       attr_reader :uri, :context
-      STUFF
-      
-#      if option[:only_repository]
-        class_eval do
-          include InstanceMethodsForOnlyRDFRepository
-        end
 
-        class_eval <<-STUFF
-        # RDFのリソースであるクラスを生成する
-        #  project = RDF::URI.new('http://project.com/')
-        #  RDFModel.new(RDF::URI.new('http://project.com/one_page'), project.context)
-        #
-        # === 引数
-        # +uri+::
-        #  RDF::URI
-        # +context+::
-        #  RDF::URI (通常は Project#context の値)
-        #
-        # === 返り値
-        # RDFModel
-        def initialize(uri, context)
-          raise unless uri && context
-          @uri = uri
-          @context = context
-        end
-        STUFF
-#      else
-#        class_eval <<-STUFF
-#        attr_writer :uri, :context
-#        STUFF
-#      end
+      # RDFのリソースであるクラスを生成する
+      #  project = RDF::URI.new('http://project.com/')
+      #  RDFModel.new(RDF::URI.new('http://project.com/one_page'), project.context)
+      #
+      # === 引数
+      # +uri+::
+      #  RDF::URI
+      # +context+::
+      #  RDF::URI (通常は Project#context の値)
+      #
+      # === 返り値
+      # このクラスのインスタンス
+      def initialize(uri, context)
+        raise unless uri && context
+        @uri = uri
+        @context = context
+      end
+      STUFF
     end
 
     # RDFのリソースであるクラスを生成する
@@ -92,7 +97,7 @@ module ActsAsRDF
     #  RDF::URI (通常は Project#context の値)
     #
     # === 返り値
-    # RDFModel
+    # このクラスのインスタンス
     def parse(id_str, context)
       self.new(self.decode_uri(id_str), context)
     end
@@ -168,7 +173,12 @@ module ActsAsRDF
     def find(uri, context)
       res = repository.query([uri, RDF.type, type, {:context => context}]).map do |x| end
       res.empty? ? nil : self.new(uri, context)
-#      self.new(uri, context) if repository.query([uri, RDF.type, type, {:context => context}])
+    end
+
+    def create(context)
+      uri = uniq_uri
+      repository.insert([uri, RDF.type, self.type, {:context => context}])
+      self.new(uri,context)
     end
 
     def type
@@ -178,12 +188,6 @@ module ActsAsRDF
 
     def define_type(new_type)
       add_type(self, new_type)
-    end
-
-    def create(context)
-      uri = uniq_uri
-      repository.insert([uri, RDF.type, self.type, {:context => context}])
-      self.new(uri,context)
     end
   end 
 
@@ -195,9 +199,7 @@ module ActsAsRDF
     def encode_uri
       self.class.encode_uri(uri)
     end
-  end
 
-  module InstanceMethodsForOnlyRDFRepository
     # このクラスの識別子を返す
     # 識別子は、URIを16進文字列で表現した文字列である
     #
@@ -220,7 +222,6 @@ module ActsAsRDF
     end
   end
 
-  class NoTypeError < StandardError
-  end
+  class NoTypeError < StandardError; end
 end
 
