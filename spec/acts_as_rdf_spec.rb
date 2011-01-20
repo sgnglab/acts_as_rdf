@@ -1,7 +1,5 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-include ActsAsRDF
-
 describe 'ActsAsRDF' do
   before do
     @alice_uri = RDF::URI.new('http://ali.ce')
@@ -23,7 +21,7 @@ describe 'ActsAsRDF' do
     }
     
     class Person
-      acts_as_rdf
+      include ActsAsRDF::Resource
       define_type RDF::FOAF['Person']
     end
   end
@@ -31,7 +29,7 @@ describe 'ActsAsRDF' do
   context 'find' do
    before do
      class PersonFind
-      acts_as_rdf
+      include ActsAsRDF::Resource
       define_type RDF::FOAF['Person'] 
      end
    end
@@ -51,7 +49,7 @@ describe 'ActsAsRDF' do
     context "if it didn't define type"do
       it "raises error" do
         class NoType
-          acts_as_rdf
+          include ActsAsRDF::Resource
         end
         lambda{ NoType.type }.should raise_error(ActsAsRDF::NoTypeError)
       end
@@ -60,11 +58,11 @@ describe 'ActsAsRDF' do
     it "can set type" do
 #      Person.find(@alice_uri, @context).type.should be_instance_of RDF::URI
       class Person3
-        acts_as_rdf
+        include ActsAsRDF::Resource
         define_type RDF::FOAF['Person3']
       end
       class Person2
-        acts_as_rdf
+        include ActsAsRDF::Resource
         define_type RDF::FOAF['Person2']
       end
       Person3.type.should == RDF::FOAF['Person3']
@@ -101,28 +99,10 @@ describe 'ActsAsRDF' do
     alice.id.should == alice.encode_uri
   end
 
-=begin
-  context 'not only repository' do
-    before do
-      class Person1
-        acts_as_rdf :only_repository => false
-      end
-      @alice = Person1.new
-      @alice.uri = @alice_uri
-      @alice.context = @context
-    end
-
-    it 'return object_id' do
-      @alice.id.should_not == Person1.encode_uri(@alice_uri)
-      @alice.id.should_not == @alice.encode_uri
-    end
-  end
-=end
-  
   context 'use has_objects' do
     before do
       class Person2
-        acts_as_rdf
+        include ActsAsRDF::Resource
         define_type RDF::FOAF['Person']
         has_objects :names, RDF::FOAF.name
         has_objects :homepages, RDF::FOAF.homepage
@@ -158,7 +138,7 @@ describe 'ActsAsRDF' do
   context 'use has_subjects' do  
     it "should return correct sujects" do  
       class Person3
-        acts_as_rdf
+        include ActsAsRDF::Resource
         define_type RDF::FOAF['Person']
         has_subjects :people, RDF::FOAF[:knows]
       end
@@ -170,7 +150,7 @@ describe 'ActsAsRDF' do
     
     it "should return correct resoueces with class" do  
       class Blog
-        acts_as_rdf
+        include ActsAsRDF::Resource
         define_type RDF::FOAF['Document']
         has_subjects :authors, RDF::FOAF.homepage, "Person"
       end
@@ -212,12 +192,12 @@ describe 'ActsAsRDF' do
   context 'update resource' do
     before do
       class Person
-        acts_as_rdf
+        include ActsAsRDF::Resource
         define_type RDF::FOAF['Person']
         has_objects :people, RDF::FOAF[:knows]
       end
       class Blog
-        acts_as_rdf
+        include ActsAsRDF::Resource
         define_type RDF::FOAF['Document']
         has_subjects :authors, RDF::FOAF[:homepage]
       end
