@@ -33,7 +33,10 @@ module ActsAsRDF
       end
 
       def build_value(value, type)
-        if type.is_a?(String)
+        case
+        when type.respond_to?(:unserialize)
+          type.unserialize(value)
+        when type.is_a?(String)
           eval "#{type}.new(value, context)"
         else
           value
@@ -41,7 +44,10 @@ module ActsAsRDF
       end
 
       def build_rdf_value(value, type)
-        if type.is_a?(String)
+        case
+        when type.respond_to?(:serialize)
+          type.serialize(value)
+        when type.is_a?(String)
           value.uri
         else
           value

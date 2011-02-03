@@ -1,5 +1,6 @@
 require 'rdf'
 require 'acts_as_rdf/exceptions'
+require 'spira'
 
 module ActsAsRDF
 

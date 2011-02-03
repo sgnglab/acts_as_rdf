@@ -11,6 +11,7 @@ module ActsAsRDF
       base.extend ClassMethods
     end
 
+    include Spira::Types
     include ::RDF
     include InstanceMethods
     include ActiveModel

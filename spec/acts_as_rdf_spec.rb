@@ -285,4 +285,39 @@ describe 'ActsAsRDF' do
       blog.authors.should include @bob_uri
     end
   end
+
+  context 'with relation type' do
+    before do
+      class Person
+        include ActsAsRDF::Resource
+        define_type RDF::FOAF['Person']
+        has_object :name, RDF::FOAF[:name], Spira::Types::String
+        has_object :age, RDF::FOAF[:age], Spira::Types::Integer
+      end
+      @alice = Person.find(@alice_uri, @context)
+    end
+
+    it 'should return string' do
+      @alice.name.should be_instance_of(String)
+      @alice.name.should == @alice_name.to_s
+    end
+
+    it 'should update' do
+      new_name = 'AAALLIICCE'
+      @alice.name = new_name
+      @alice.name.should be_instance_of(String)
+      @alice.name.should == new_name
+    end
+
+    it 'should update' do
+      new_name = 'AAALLIICCE'
+      @alice.name = new_name
+      @alice.name.should be_instance_of(String)
+      @alice.name.should == new_name
+
+#      @alice.age = 20
+#      @alice.age.should be_instance_of(Integer)
+#      @alice.age.should == 20
+    end
+  end
 end
