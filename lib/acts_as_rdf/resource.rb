@@ -1,5 +1,11 @@
 module ActsAsRDF
 
+  ##
+  # 実際に利用する時はこのモジュールを組み込んで使用する
+  #     class Person
+  #       include ActsAsRDF::Resource
+  #       has_objects :friends, RDF::FOAF[:Person]
+  #     end
   module Resource
     autoload :DSL,              'acts_as_rdf/resource/dsl'
     autoload :ClassMethods,     'acts_as_rdf/resource/class_methods'

@@ -1,37 +1,40 @@
 module ActsAsRDF
   module Resource
     module InstanceMethods
-      attr_accessor :uri, :context
+      # このクラスのURI
+      attr_accessor :uri
+      # このクラスのContext
+      attr_accessor :context
+
       # RDFのリソースであるクラスを生成する
-      #  project = RDF::URI.new('http://project.com/')
-      #  RDFModel.new(RDF::URI.new('http://project.com/one_page'), project.context)
+      #      project = RDF::URI.new('http://project.com/')
+      #      ActsAsRDF.new(RDF::URI.new('http://project.com/one_page'), project.context)
       #
-      # === 引数
-      # +uri+::
-      #  RDF::URI
-      # +context+::
-      #  RDF::URI (通常は Project#context の値)
-      #
-      # === 返り値
-      # RDFModel
+      # @param [RDF::URI] uri
+      # @param [RDF::URI] context (メタデータシステムの場合、通常は Project#context の値)
+      # @return [self]
       def initialize(uri, context)
         raise unless uri && context
         @uri = uri
         @context = context
       end
-      
+
       # URIを16進文字列で表現した文字列を返す
       #
-      # === 返り値
-      #  String
+      # @return [String]
       def encode_uri
         self.class.encode_uri(uri)
       end
-      
+
+      #
+      # @return [RDF::Repository]
       def repository
         self.class.repository
       end
 
+      # @param [Object] value
+      # @param [String, Spira::Type] type
+      # @return [Object]
       def build_value(value, type)
         case
         when type.respond_to?(:unserialize)
@@ -43,6 +46,9 @@ module ActsAsRDF
         end
       end
 
+      # @param [Object] value
+      # @param [String, Spira::Type] type
+      # @return [RDF::URI, RDF::Literal]
       def build_rdf_value(value, type)
         case
         when type.respond_to?(:serialize)
@@ -53,7 +59,11 @@ module ActsAsRDF
           value
         end
       end
-      
+
+      # @param [RDF::URI] property
+      # @param [String, Spira::Type] type
+      # @param [Hash] opt
+      # @return [Object]
       def get_objects(property, type=nil, opt={:single=>false})
         obj = repository.query([uri, property, nil, {:context => context}]).map{|s|
           build_value(s.object, type)
@@ -61,6 +71,10 @@ module ActsAsRDF
         opt[:single] ? obj.first : obj
       end
        
+      # @param [RDF::URI] property
+      # @param [Object] objects
+      # @param [String, Spira::Type] type
+      # @param [Hash] opt
       def set_objects(property, objects, method_name, type=nil, opt={:single=>false})
         delete_objects(property)
         if opt[:single]
@@ -74,23 +88,28 @@ module ActsAsRDF
         end
       end
 
+      # @param [RDF::URI] property
       def delete_objects(property)
         repository.delete([uri, property, nil, {:context => context}])
       end
 
+      # @param [RDF::URI] property
+      # @param [String, Spira::Type] type
+      # @param [Hash] opt
+      # @return [Object]
       def get_subjects(property, type=nil, opt={:single=>false})
         subj = repository.query([nil, property, uri, {:context => context}]).map{|s|
           build_value(s.subject, type)
         }
         opt[:single] ? subj.first : subj
       end
-      
+ 
+      # @param [RDF::URI] property
+      # @param [Object] resouces
+      # @param [String, Spira::Type] type
+      # @param [Hash] opt
       def set_subjects(property, resources, method_name, type=nil, opt={:single=>false})  
         delete_subjects(property)
-#        send(method_name).each do |resource|
-#          resource = build_rdf_value(resource, type)
-#          repository.delete([resource, property, uri, {:context => context}])
-#        end
         if opt[:single]
           resource = build_rdf_value(resources, type)
           repository.insert([resource, property, uri, {:context => context}])
@@ -102,6 +121,7 @@ module ActsAsRDF
         end
       end
 
+      # @param [RDF::URI] property
       def delete_subjects(property)
         repository.delete([nil, property, uri, {:context => context}])
       end

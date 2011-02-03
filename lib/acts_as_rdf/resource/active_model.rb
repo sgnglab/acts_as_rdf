@@ -3,8 +3,7 @@ module ActsAsRDF
     # このクラスの識別子を返す
     # 識別子は、URIを16進文字列で表現した文字列である
     #
-    # === 返り値
-    #  String
+    # @return [String]
     def id
       encode_uri
     end
@@ -14,9 +13,9 @@ module ActsAsRDF
     # 永続するデータかどうかの確認
     # このクラスのものはRDF::Repositoryに保存されるはずなので
     # trueを返す
-    #
-    # === 返り値
-    # true
+    # 
+    # @return [true]
+    # @see http://api.rubyonrails.org/classes/ActiveModel/Conversion.html
     def persisted?
       true
     end
