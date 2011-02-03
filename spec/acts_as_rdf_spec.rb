@@ -135,6 +135,36 @@ describe 'ActsAsRDF' do
     end
   end
 
+  context 'use has_object' do
+    before do
+      class Person2
+        include ActsAsRDF::Resource
+        define_type RDF::FOAF['Person']
+        has_object :name, RDF::FOAF.name
+        has_object :homepage, RDF::FOAF.homepage
+        has_object :person, RDF::FOAF.knows, 'Person'
+      end
+      @alice = Person2.find(@alice_uri, @context)
+    end
+
+    it "should return correct literals" do  
+      @alice.name.should be_instance_of(RDF::Literal)
+      @alice.name.should be_equal(@alice_name)
+    end
+    
+    it "should return correct resoueces" do
+      @alice.homepage.should be_instance_of(RDF::URI)
+      @alice.homepage.should be_equal(@alice_blog)
+    end
+    
+    it "should return correct resoueces with class" do  
+      bob = @alice.person
+      bob.should be_instance_of(Person)
+      bob.uri.should be_equal(@bob_uri)
+      bob.context.should be_equal(@context)
+    end
+  end
+
   context 'use has_subjects' do  
     it "should return correct sujects" do  
       class Person3

@@ -31,15 +31,16 @@ module ActsAsRDF
       def repository
         self.class.repository
       end
-      
-      def get_objects(property, class_name=nil)
-        repository.query([uri, property, nil, {:context => context}]).map{|s|
+ 
+      def get_objects(property, class_name=nil, opt={:single=>false})
+        obj = repository.query([uri, property, nil, {:context => context}]).map{|s|
           if class_name
             eval "#{class_name}.new(s.object, context)"
           else
             s.object
-            end
+          end
         }
+        opt[:single] ? obj.first : obj
       end
        
       def set_objects(property, objects, method_name, class_name=nil) 
