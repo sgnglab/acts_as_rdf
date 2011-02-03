@@ -53,14 +53,15 @@ module ActsAsRDF
         end
       end
       
-      def get_subjects(property, class_name=nil)
-        repository.query([nil, property, uri, {:context => context}]).map{|s|
+      def get_subjects(property, class_name=nil, opt={:single=>false})
+        subj = repository.query([nil, property, uri, {:context => context}]).map{|s|
           if class_name
             eval "#{class_name}.new(s.subject, context)"
           else
             s.subject
           end
         }
+        opt[:single] ? subj.first : subj
       end
       
       def set_subjects(property, resources, method_name, class_name=nil)  

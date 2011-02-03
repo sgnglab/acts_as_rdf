@@ -193,6 +193,33 @@ describe 'ActsAsRDF' do
     end
   end
 
+  context 'use has_subject' do  
+    it "should return correct suject" do  
+      class Person3
+        include ActsAsRDF::Resource
+        define_type RDF::FOAF['Person']
+        has_subject :person, RDF::FOAF[:knows]
+      end
+
+      bob = Person3.find(@bob_uri, @context)
+      bob.person.should be_equal(@alice_uri)
+    end
+    
+    it "should return correct resouece with class" do  
+      class Blog
+        include ActsAsRDF::Resource
+        define_type RDF::FOAF['Document']
+        has_subject :author, RDF::FOAF.homepage, "Person"
+      end
+
+      blog = Blog.find(@alice_blog, @context)
+      alice = blog.author
+      alice.should be_instance_of(Person)
+      alice.uri.should be_equal(@alice_uri)
+      alice.context.should be_equal(@context)
+    end
+  end
+
   context 'generate uniq_uri' do
     it "should return RDF:URI" do
       ActsAsRDF.uniq_uri.should be_instance_of(RDF::URI)
