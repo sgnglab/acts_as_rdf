@@ -31,45 +31,55 @@ module ActsAsRDF
       def repository
         self.class.repository
       end
- 
-      def get_objects(property, class_name=nil, opt={:single=>false})
+
+      def build_value(value, type)
+        if type.is_a?(String)
+          eval "#{type}.new(value, context)"
+        else
+          value
+        end
+      end
+
+      def build_rdf_value(value, type)
+        if type.is_a?(String)
+          value.uri
+        else
+          value
+        end
+      end
+      
+      def get_objects(property, type=nil, opt={:single=>false})
         obj = repository.query([uri, property, nil, {:context => context}]).map{|s|
-          if class_name
-            eval "#{class_name}.new(s.object, context)"
-          else
-            s.object
-          end
+          build_value(s.object, type)
         }
         opt[:single] ? obj.first : obj
       end
        
-      def set_objects(property, objects, method_name, class_name=nil) 
+      def set_objects(property, objects, method_name, type=nil) 
         send(method_name).each do |object|
-          object = object.uri if class_name
+          object = build_rdf_value(object, type)
           repository.delete([uri, property, object, {:context => context}])
         end
         objects.each do |object|
+          object = build_rdf_value(object, type)
           repository.insert([uri, property, object, {:context => context}])
         end
       end
       
-      def get_subjects(property, class_name=nil, opt={:single=>false})
+      def get_subjects(property, type=nil, opt={:single=>false})
         subj = repository.query([nil, property, uri, {:context => context}]).map{|s|
-          if class_name
-            eval "#{class_name}.new(s.subject, context)"
-          else
-            s.subject
-          end
+          build_value(s.subject, type)
         }
         opt[:single] ? subj.first : subj
       end
       
-      def set_subjects(property, resources, method_name, class_name=nil)  
+      def set_subjects(property, resources, method_name, type=nil)  
         send(method_name).each do |resource|
-          resource = resource.uri if class_name
+          resource = build_rdf_value(resource, type)
           repository.delete([resource, property, uri, {:context => context}])
         end
         resources.each do |resource|
+          resource = build_rdf_value(resource, type)
           repository.insert([resource, property, uri, {:context => context}])
         end
       end

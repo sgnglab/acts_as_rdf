@@ -252,6 +252,7 @@ describe 'ActsAsRDF' do
         include ActsAsRDF::Resource
         define_type RDF::FOAF['Person']
         has_objects :people, RDF::FOAF[:knows]
+        has_objects :people2, RDF::FOAF[:knows], 'Person'
       end
       class Blog
         include ActsAsRDF::Resource
@@ -266,6 +267,15 @@ describe 'ActsAsRDF' do
       alice.people.size.should == 2
       alice.people.should include @alice_uri
       alice.people.should include @bob_uri
+    end
+    it 'should update subject via Ruby Class' do
+      alice = Person.find(@alice_uri,@context)
+      alice.people2 = [Person.new(@alice_uri,@context), Person.new(@bob_uri,@context)]
+      alice.people2.size.should == 2
+      alice.people2.first.should be_instance_of(Person)
+      uris = alice.people2.map{|s| s.uri}
+      uris.should include @alice_uri
+      uris.should include @bob_uri
     end
     it 'should update subject' do
       blog = Blog.find(@alice_blog,@context)
