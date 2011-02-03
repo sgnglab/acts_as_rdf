@@ -24,14 +24,14 @@ describe 'ActsAsRDF' do
 
   context 'use has_objects' do
     before do
-      class Person2
+      class PersonHOS
         include ActsAsRDF::Resource
         define_type RDF::FOAF['Person']
         has_objects :homepages, RDF::FOAF.homepage
         has_objects :names, RDF::FOAF.name, String
-        has_objects :people, RDF::FOAF.knows, 'Person'
+        has_objects :people, RDF::FOAF.knows, 'PersonHOS'
       end
-      @alice = Person2.find(@alice_uri, @context)
+      @alice = PersonHOS.find(@alice_uri, @context)
     end
 
     context 'when getting objects' do
@@ -54,7 +54,7 @@ describe 'ActsAsRDF' do
       it "should return correct resoueces with class" do  
         @alice.people.size.should be_equal(1)
         bob = @alice.people.first
-        bob.should be_instance_of(Person)
+        bob.should be_instance_of(PersonHOS)
         bob.uri.should be_equal(@bob_uri)
         bob.context.should be_equal(@context)
       end
@@ -78,7 +78,7 @@ describe 'ActsAsRDF' do
       it 'should update object via Ruby Class' do
         @alice.people = [@alice_uri, @bob_uri].map{|u| Person.new(u ,@context) }
         @alice.people.size.should == 2
-        @alice.people.first.should be_instance_of(Person)
+        @alice.people.first.should be_instance_of(PersonHOS)
         uris = @alice.people.map{|s| s.uri }
         uris.should include @alice_uri
         uris.should include @bob_uri
@@ -88,20 +88,20 @@ describe 'ActsAsRDF' do
 
   context 'use has_object' do
     before do
-      class Person2
+      class PersonHO
         include ActsAsRDF::Resource
         define_type RDF::FOAF['Person']
-        has_object :name, RDF::FOAF.name
+        has_object :name, RDF::FOAF.name, String
         has_object :homepage, RDF::FOAF.homepage
-        has_object :person, RDF::FOAF.knows, 'Person'
+        has_object :person, RDF::FOAF.knows, 'PersonHO'
       end
-      @alice = Person2.find(@alice_uri, @context)
+      @alice = PersonHO.find(@alice_uri, @context)
     end
 
     context 'when getting object' do
       it "should return a correct literal" do  
-        @alice.name.should be_instance_of(RDF::Literal)
-        @alice.name.should be_equal(@alice_name)
+        @alice.name.should be_instance_of(String)
+        @alice.name.should be_equal(@alice_name.to_s)
       end
       
       it "should return correct resoueces" do
@@ -111,30 +111,46 @@ describe 'ActsAsRDF' do
       
       it "should return correct resoueces with class" do  
         bob = @alice.person
-        bob.should be_instance_of(Person)
+        bob.should be_instance_of(PersonHO)
         bob.uri.should be_equal(@bob_uri)
         bob.context.should be_equal(@context)
       end
     end
 
     context 'when setting object' do
+      it 'should update object' do
+        @alice.homepage = @bob_uri
+        @alice.homepage.should == @bob_uri
+      end
+
+      it 'should update literals' do
+        @alice.name = 'Alice Pleasance Liddell'
+        @alice.name.should == 'Alice Pleasance Liddell'
+      end
+
+      it 'should update object via Ruby Class' do
+        @alice.person = PersonHO.new(@alice_uri ,@context)
+        @alice.person.should be_instance_of(PersonHO)
+        @alice.person.uri.should == @alice_uri
+        @alice.person.context.should == @context
+      end
     end
   end
 
   context 'use has_subjects' do
     before do
-      class Person3
+      class PersonHSS
         include ActsAsRDF::Resource
         define_type RDF::FOAF['Person']
         has_subjects :people, RDF::FOAF[:knows]
       end
-      class Blog
+      class BlogHSS
         include ActsAsRDF::Resource
         define_type RDF::FOAF['Document']
         has_subjects :authors, RDF::FOAF[:homepage]
-        has_subjects :authors2, RDF::FOAF[:homepage], "Person"
+        has_subjects :authors2, RDF::FOAF[:homepage], "PersonHSS"
       end
-      @blog = Blog.find(@alice_blog, @context)
+      @blog = BlogHSS.find(@alice_blog, @context)
     end
 
     context 'when getting subjects' do
@@ -150,7 +166,7 @@ describe 'ActsAsRDF' do
       
       it "should return correct resoueces with class" do  
         alice = @blog.authors2.first
-        alice.should be_instance_of(Person)
+        alice.should be_instance_of(PersonHSS)
         alice.uri.should be_equal(@alice_uri)
         alice.context.should be_equal(@context)
       end
@@ -165,9 +181,9 @@ describe 'ActsAsRDF' do
       end
 
       it 'should update object via Ruby Class' do
-        @blog.authors2 = [@alice_uri, @bob_uri].map{|u| Person.new(u, @context) }
+        @blog.authors2 = [@alice_uri, @bob_uri].map{|u| PersonHSS.new(u, @context) }
         @blog.authors2.size.should == 2
-        @blog.authors2.first.should be_instance_of(Person)
+        @blog.authors2.first.should be_instance_of(PersonHSS)
         uris = @blog.authors2.map{|s| s.uri }
         uris.should include @alice_uri
         uris.should include @bob_uri
@@ -176,34 +192,46 @@ describe 'ActsAsRDF' do
   end
 
   context 'use has_subject' do  
+    before do
+      class PersonHS
+        include ActsAsRDF::Resource
+        define_type RDF::FOAF['Person']
+        has_subject :person, RDF::FOAF[:knows]
+      end
+      class BlogHS
+        include ActsAsRDF::Resource
+        define_type RDF::FOAF['Document']
+        has_subject :author, RDF::FOAF.homepage, "PersonHS"
+      end
+      @bob = PersonHS.find(@bob_uri, @context)
+      @blog = BlogHS.find(@alice_blog, @context)
+    end
+    
     context 'when getting subject' do
-      it "should return correct suject" do  
-        class Person3
-          include ActsAsRDF::Resource
-          define_type RDF::FOAF['Person']
-          has_subject :person, RDF::FOAF[:knows]
-        end
-        
-        bob = Person3.find(@bob_uri, @context)
-        bob.person.should be_equal(@alice_uri)
+      it "should return correct suject" do     
+        @bob.person.should be_equal(@alice_uri)
       end
       
-      it "should return correct resouece with class" do  
-        class Blog
-          include ActsAsRDF::Resource
-          define_type RDF::FOAF['Document']
-          has_subject :author, RDF::FOAF.homepage, "Person"
-        end
-        
-        blog = Blog.find(@alice_blog, @context)
-        alice = blog.author
-        alice.should be_instance_of(Person)
+      it "should return correct resouece with class" do        
+        alice = @blog.author
+        alice.should be_instance_of(PersonHS)
         alice.uri.should be_equal(@alice_uri)
         alice.context.should be_equal(@context)
       end
     end
 
     context 'when setting subject' do
+      it 'should update subject' do
+        @bob.person = @bob_uri
+        @bob.person.should == @bob_uri
+      end
+
+      it 'should update subject via Ruby Class' do
+        @blog.author = PersonHS.new(@bob_uri, @context)
+        @blog.author.should be_instance_of(PersonHS)
+        @blog.author.uri.should == @bob_uri
+        @blog.author.context.should == @context
+      end
     end
   end
 end

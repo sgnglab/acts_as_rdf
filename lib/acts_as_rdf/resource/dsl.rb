@@ -11,7 +11,7 @@ module ActsAsRDF
 
       def _has_objects(method_name, property, type=nil, opt={:single => false})
         self.send(:define_method, method_name.to_s+'=') do |arg|
-          set_objects(property, arg, method_name, type)
+          set_objects(property, arg, method_name, type, opt)
         end
         self.send(:define_method, method_name) do
           get_objects(property, type, opt)
@@ -28,7 +28,7 @@ module ActsAsRDF
 
       def _has_subjects(method_name, property, type=nil, opt={:single => false})
         self.send(:define_method, method_name.to_s+'=') do |arg|
-          set_subjects(property, arg, method_name, type)
+          set_subjects(property, arg, method_name, type, opt)
         end
         self.send(:define_method, method_name) do
           get_subjects(property, type, opt)
