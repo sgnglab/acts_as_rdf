@@ -9,6 +9,7 @@ require 'spira'
 # @see http://github.com/bhuga/spira
 module ActsAsRDF
 
+  @@settings = nil # システムの設定情報を格納する
   @@rand_place = 10000 # ユニークURIを生成する際の最大値
 
   def self.included(base)
@@ -22,7 +23,7 @@ module ActsAsRDF
   #
   # @param [Hash]
   def settings
-    Thread.current[:acts_as_rdf] ||= {}
+    @@settings ||= {}
   end
   module_function :settings
 
