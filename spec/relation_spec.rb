@@ -75,6 +75,11 @@ describe 'ActsAsRDF' do
         @alice.names.should include 'Alice Pleasance Liddell'
       end
 
+      it 'should update zero-literal' do
+        @alice.names = []
+        @alice.names.should be_empty
+      end
+
       it 'should update object via Ruby Class' do
         @alice.people = [@alice_uri, @bob_uri].map{|u| Person.new(u ,@context) }
         @alice.people.size.should == 2
