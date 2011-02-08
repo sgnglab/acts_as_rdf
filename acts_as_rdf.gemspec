@@ -23,7 +23,6 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version      = '>= 1.8.1'
   gem.requirements               = []
   gem.add_runtime_dependency     'rdf', '>= 0.3.0'
-  gem.add_runtime_dependency     'spira', '>= 0.0.11'
   gem.add_runtime_dependency     'addressable', '>= 2.2'
   gem.add_development_dependency 'yard',        '>= 0.6.0'
   gem.add_development_dependency 'rspec',       '>= 2.4.0'
