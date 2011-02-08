@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 module ActsAsRDF
   module Resource
     module InstanceMethods
@@ -65,7 +66,7 @@ module ActsAsRDF
       # @param [Hash] opt
       # @return [Object]
       def get_objects(property, type=nil, opt={:single=>false})
-        obj = repository.query([uri, property, nil, {:context => context}]).map{|s|
+        obj = repository.query([uri, property, nil, context]).map{|s|
           build_value(s.object, type)
         }
         opt[:single] ? obj.first : obj
@@ -79,18 +80,18 @@ module ActsAsRDF
         delete_objects(property)
         if opt[:single]
           object = build_rdf_value(objects, type)
-          repository.insert([uri, property, object, {:context => context}])
+          repository.insert([uri, property, object, context])
         else
           objects.each do |object|
             object = build_rdf_value(object, type)
-            repository.insert([uri, property, object, {:context => context}])
+            repository.insert([uri, property, object, context])
           end
         end
       end
 
       # @param [RDF::URI] property
       def delete_objects(property)
-        repository.delete([uri, property, nil, {:context => context}])
+        repository.delete([uri, property, nil, context])
       end
 
       # @param [RDF::URI] property
@@ -98,7 +99,7 @@ module ActsAsRDF
       # @param [Hash] opt
       # @return [Object]
       def get_subjects(property, type=nil, opt={:single=>false})
-        subj = repository.query([nil, property, uri, {:context => context}]).map{|s|
+        subj = repository.query([nil, property, uri, context]).map{|s|
           build_value(s.subject, type)
         }
         opt[:single] ? subj.first : subj
@@ -112,18 +113,18 @@ module ActsAsRDF
         delete_subjects(property)
         if opt[:single]
           resource = build_rdf_value(resources, type)
-          repository.insert([resource, property, uri, {:context => context}])
+          repository.insert([resource, property, uri, context])
         else
           resources.each do |resource|
             resource = build_rdf_value(resource, type)
-            repository.insert([resource, property, uri, {:context => context}])
+            repository.insert([resource, property, uri, context])
           end
         end
       end
 
       # @param [RDF::URI] property
       def delete_subjects(property)
-        repository.delete([nil, property, uri, {:context => context}])
+        repository.delete([nil, property, uri, context])
       end
     end
   end

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
 # 基本的な機能のテスト
@@ -10,8 +11,8 @@ describe 'ActsAsRDF' do
 
     ActsAsRDF.repository = RDF::Repository.new{|r|
       r << [@alice_uri, RDF::FOAF.name, 'wrong_name']
-      r << [@alice_uri, RDF::FOAF.name, @alice_name, {:context => @context}]
-      r << [@alice_uri, RDF.type, RDF::FOAF['Person'], {:context => @context}]
+      r << [@alice_uri, RDF::FOAF.name, @alice_name, @context]
+      r << [@alice_uri, RDF.type, RDF::FOAF['Person'], @context]
     }
 
     class Person

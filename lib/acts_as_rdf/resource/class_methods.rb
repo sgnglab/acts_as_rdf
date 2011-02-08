@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 module ActsAsRDF
   module Resource
     module ClassMethods
@@ -33,7 +34,7 @@ module ActsAsRDF
       # @param [RDF::URI] context
       # @param [self, nil]
       def find(uri, context)
-        res = repository.query([uri, RDF.type, type, {:context => context}]).map do |x| end
+        res = repository.query([uri, RDF.type, type, context]).map do |x| end
         res.empty? ? nil : self.new(uri, context)
       end
       
@@ -44,7 +45,7 @@ module ActsAsRDF
       # @param [self]
       def create(context)
         uri = ActsAsRDF.uniq_uri
-        repository.insert([uri, RDF.type, self.type, {:context => context}])
+        repository.insert([uri, RDF.type, self.type, context])
         self.new(uri,context)
       end
 

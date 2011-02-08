@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
 # 関連の型変換に関するテスト
@@ -13,12 +14,12 @@ describe 'ActsAsRDF' do
 
     ActsAsRDF.repository = RDF::Repository.new{|r|
       r << [@alice_uri, RDF::FOAF.name, 'wrong_name']
-      r << [@alice_uri, RDF::FOAF.name, @alice_name, {:context => @context}]
-      r << [@alice_uri, RDF::FOAF.homepage, @alice_blog, {:context => @context}]
-      r << [@alice_uri, RDF::FOAF.knows, @bob_uri, {:context => @context}]
-      r << [@alice_uri, RDF.type, RDF::FOAF['Person'], {:context => @context}]
-      r << [@bob_uri, RDF.type, RDF::FOAF['Person'], {:context => @context}]
-      r << [@alice_blog, RDF.type, RDF::FOAF['Document'], {:context => @context}]
+      r << [@alice_uri, RDF::FOAF.name, @alice_name, @context]
+      r << [@alice_uri, RDF::FOAF.homepage, @alice_blog, @context]
+      r << [@alice_uri, RDF::FOAF.knows, @bob_uri, @context]
+      r << [@alice_uri, RDF.type, RDF::FOAF['Person'], @context]
+      r << [@bob_uri, RDF.type, RDF::FOAF['Person'], @context]
+      r << [@alice_blog, RDF.type, RDF::FOAF['Document'], @context]
     }
     
     class Person
