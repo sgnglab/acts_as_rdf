@@ -15,6 +15,12 @@ module ActsAsRDF
     def self.included(base)
       base.extend DSL
       base.extend ClassMethods
+      base.instance_eval do
+        class << self
+          attr_accessor :relations
+        end
+        @relations = []
+      end
     end
 
     include Spira::Types

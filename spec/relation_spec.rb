@@ -90,6 +90,16 @@ describe 'ActsAsRDF' do
         uris.should include @bob_uri
       end
     end
+
+    it "should return relations" do
+      class PersonHOS2
+        include ActsAsRDF::Resource
+        define_type RDF::FOAF['Person']
+        has_objects :homepages, RDF::FOAF.homepage
+      end
+      PersonHOS2.relations.should == [:homepages]
+      PersonHOS.relations.should == [:homepages, :names, :people]
+    end
   end
 
   context 'use has_object' do
@@ -195,6 +205,11 @@ describe 'ActsAsRDF' do
         uris.should include @bob_uri
       end
     end
+
+    it "should return relations" do
+      PersonHSS.relations.should == [:people]
+      BlogHSS.relations.should == [:authors, :authors2]
+    end
   end
 
   context 'use has_subject' do  
@@ -238,6 +253,21 @@ describe 'ActsAsRDF' do
         @blog.author.uri.should == @bob_uri
         @blog.author.context.should == @context
       end
+    end
+  end
+  
+  context "use has_object and has_subjects" do
+    before do
+      class PersonHOHSS
+        include ActsAsRDF::Resource
+        define_type RDF::FOAF['Person']
+        has_object :name, RDF::FOAF[:name], String
+        has_subjects :known_to, RDF::FOAF[:knows], PersonHOHSS
+      end
+    end
+
+    it "should return relations" do
+      PersonHOHSS.relations.should == [:name, :known_to]
     end
   end
 end

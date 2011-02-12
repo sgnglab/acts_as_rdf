@@ -22,6 +22,7 @@ module ActsAsRDF
       # @param (see #has_objects)
       # @param [Hash] opt
       def _has_objects(method_name, property, type=nil, opt={:single => false})
+        register_relation method_name
         self.send(:define_method, method_name.to_s+'=') do |arg|
           set_objects(property, arg, method_name, type, opt)
         end
@@ -44,12 +45,20 @@ module ActsAsRDF
 
       # @param (see #_has_objects)
       def _has_subjects(method_name, property, type=nil, opt={:single => false})
+        register_relation method_name
         self.send(:define_method, method_name.to_s+'=') do |arg|
           set_subjects(property, arg, method_name, type, opt)
         end
         self.send(:define_method, method_name) do
           get_subjects(property, type, opt)
         end
+      end
+
+      # 関連名を追加する
+      #
+      # @param [Symbol] relation_name
+      def register_relation(relation_name)
+        @relations << relation_name
       end
       
       ##
