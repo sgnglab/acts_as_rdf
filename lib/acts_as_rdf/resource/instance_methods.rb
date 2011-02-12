@@ -18,6 +18,7 @@ module ActsAsRDF
         raise unless uri && context
         @uri = uri
         @context = context
+        @attr = {}
       end
 
       # URIを16進文字列で表現した文字列を返す
@@ -31,6 +32,14 @@ module ActsAsRDF
       # @return [RDF::Repository]
       def repository
         self.class.repository
+      end
+
+      # 関連の値を保存する
+      #
+      # @param [Symbol] attr_name
+      # @param [Object] arg
+      def _set_attr(attr_name, arg)
+        @attr[attr_name] = arg
       end
 
       # @param [Object] value
@@ -65,24 +74,24 @@ module ActsAsRDF
       # @param [String, Spira::Type] type
       # @param [Hash] opt
       # @return [Object]
-      def get_objects(property, type=nil, opt={:single=>false})
+      def get_objects(method_name, property, type=nil, opt={:single=>false})
         obj = repository.query([uri, property, nil, context]).map{|s|
           build_value(s.object, type)
         }
-        opt[:single] ? obj.first : obj
+        @attr[method_name] = opt[:single] ? obj.first : obj
       end
        
       # @param [RDF::URI] property
       # @param [Object] objects
       # @param [String, Spira::Type] type
       # @param [Hash] opt
-      def set_objects(property, objects, method_name, type=nil, opt={:single=>false})
+      def set_objects(property, method_name, type=nil, opt={:single=>false})
         delete_objects(property)
         if opt[:single]
-          object = build_rdf_value(objects, type)
+          object = build_rdf_value(@attr[method_name], type)
           repository.insert([uri, property, object, context])
         else
-          objects.each do |object|
+          @attr[method_name].each do |object|
             object = build_rdf_value(object, type)
             repository.insert([uri, property, object, context])
           end
@@ -98,24 +107,24 @@ module ActsAsRDF
       # @param [String, Spira::Type] type
       # @param [Hash] opt
       # @return [Object]
-      def get_subjects(property, type=nil, opt={:single=>false})
+      def get_subjects(method_name, property, type=nil, opt={:single=>false})
         subj = repository.query([nil, property, uri, context]).map{|s|
           build_value(s.subject, type)
         }
-        opt[:single] ? subj.first : subj
+        @attr[method_name] = opt[:single] ? subj.first : subj
       end
  
       # @param [RDF::URI] property
       # @param [Object] resouces
       # @param [String, Spira::Type] type
       # @param [Hash] opt
-      def set_subjects(property, resources, method_name, type=nil, opt={:single=>false})  
+      def set_subjects(property, method_name, type=nil, opt={:single=>false})  
         delete_subjects(property)
         if opt[:single]
-          resource = build_rdf_value(resources, type)
+          resource = build_rdf_value(@attr[method_name], type)
           repository.insert([resource, property, uri, context])
         else
-          resources.each do |resource|
+          @attr[method_name].each do |resource|
             resource = build_rdf_value(resource, type)
             repository.insert([resource, property, uri, context])
           end

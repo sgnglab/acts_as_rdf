@@ -22,15 +22,24 @@ module ActsAsRDF
       # @param (see #has_objects)
       # @param [Hash] opt
       def _has_objects(method_name, property, type=nil, opt={:single => false})
+        m_names = _relation_method_names(method_name)
         register_relation method_name
-        self.send(:define_method, method_name.to_s+'=') do |arg|
-          set_objects(property, arg, method_name, type, opt)
+        self.send(:define_method, m_names[:save]) do
+          set_objects(property, method_name, type, opt)
         end
-        self.send(:define_method, method_name) do
-          get_objects(property, type, opt)
+        self.send(:define_method, m_names[:set]) do |arg|
+          _set_attr(method_name, arg)
+          self.send(m_names[:save])
+        end
+        self.send(:define_method, m_names[:load]) do
+          get_objects(method_name, property, type, opt)
+        end
+        self.send(:define_method, m_names[:get]) do
+          self.send(m_names[:load])
+          @attr[method_name]
         end
       end
-
+      
       #
       # @param (see #has_objects)
       def has_subjects(method_name, property, type=nil)
@@ -45,13 +54,38 @@ module ActsAsRDF
 
       # @param (see #_has_objects)
       def _has_subjects(method_name, property, type=nil, opt={:single => false})
+        m_names = _relation_method_names(method_name)
         register_relation method_name
-        self.send(:define_method, method_name.to_s+'=') do |arg|
-          set_subjects(property, arg, method_name, type, opt)
+        self.send(:define_method, m_names[:save]) do
+          set_subjects(property, method_name, type, opt)
         end
-        self.send(:define_method, method_name) do
-          get_subjects(property, type, opt)
+        self.send(:define_method, m_names[:set]) do |arg|
+          _set_attr(method_name, arg)
+          self.send(m_names[:save])
         end
+        self.send(:define_method, m_names[:load]) do
+          get_subjects(method_name, property, type, opt)
+        end
+        self.send(:define_method, m_names[:get]) do
+          self.send(m_names[:load])
+          @attr[method_name]
+        end
+      end
+
+      # 関連のデータの入出力のためのメソッド名を返す
+      # 返り値のキーが用途で、その値がメソッド名
+      #
+      # @param [Symbol] base_name      
+      def _relation_method_names(base_name)
+        base_name = base_name.to_s
+        {
+          # 非破壊的
+          :get => base_name,       # 取得
+          :set => base_name + '=', # 更新
+          # 破壊的
+          :load => '_load_' + base_name, # 取得
+          :save => '_save_' + base_name  # 更新
+        }
       end
 
       # 関連名を追加する
