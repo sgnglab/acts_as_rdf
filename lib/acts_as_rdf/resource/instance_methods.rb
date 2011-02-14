@@ -19,6 +19,16 @@ module ActsAsRDF
         @uri = uri
         @context = context
         @attr = {}
+        @loaded = false
+      end
+
+      # 関連のデータを読み込む
+      #
+      def load
+        self.class.relations.each{|rel|
+          self.send(self.class._relation_method_names(rel)[:load])
+        }
+        @loaded = true
       end
 
       # URIを16進文字列で表現した文字列を返す

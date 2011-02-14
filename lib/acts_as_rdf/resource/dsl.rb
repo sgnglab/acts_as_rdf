@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 module ActsAsRDF
   module Resource
     module DSL
@@ -35,7 +36,7 @@ module ActsAsRDF
           get_objects(method_name, property, type, opt)
         end
         self.send(:define_method, m_names[:get]) do
-          self.send(m_names[:load])
+          load unless @loaded
           @attr[method_name]
         end
       end
@@ -67,7 +68,7 @@ module ActsAsRDF
           get_subjects(method_name, property, type, opt)
         end
         self.send(:define_method, m_names[:get]) do
-          self.send(m_names[:load])
+          load unless @loaded
           @attr[method_name]
         end
       end
