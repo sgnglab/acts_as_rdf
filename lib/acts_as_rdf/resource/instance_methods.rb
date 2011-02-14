@@ -31,6 +31,15 @@ module ActsAsRDF
         @loaded = true
       end
 
+      # 関連のデータを保存する
+      #
+      def save
+        self.class.relations.each{|rel|
+          self.send(self.class._relation_method_names(rel)[:save])
+        }
+        load
+      end
+
       # URIを16進文字列で表現した文字列を返す
       #
       # @return [String]

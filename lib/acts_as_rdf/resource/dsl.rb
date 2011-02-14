@@ -29,8 +29,8 @@ module ActsAsRDF
           set_objects(property, method_name, type, opt)
         end
         self.send(:define_method, m_names[:set]) do |arg|
+          load unless @loaded
           _set_attr(method_name, arg)
-          self.send(m_names[:save])
         end
         self.send(:define_method, m_names[:load]) do
           get_objects(method_name, property, type, opt)
@@ -61,8 +61,8 @@ module ActsAsRDF
           set_subjects(property, method_name, type, opt)
         end
         self.send(:define_method, m_names[:set]) do |arg|
+          load unless @loaded
           _set_attr(method_name, arg)
-          self.send(m_names[:save])
         end
         self.send(:define_method, m_names[:load]) do
           get_subjects(method_name, property, type, opt)

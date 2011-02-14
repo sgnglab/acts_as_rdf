@@ -24,11 +24,30 @@ describe 'ActsAsRDF' do
     end
   end
   
-
   it "should be return cache" do
     alice = Person.find(@alice_uri, @context)
     name = alice.name
     ActsAsRDF.repository = RDF::Repository.new
     alice.name.should == name
+  end
+
+  it "should not return cache if reloaded" do
+    alice = Person.find(@alice_uri, @context)
+    name = alice.name
+    alice.name = "a"
+    alice.name.should == "a"
+    alice.load
+    alice.name.should == name
+  end
+
+  it "should update" do
+    alice = Person.find(@alice_uri, @context)
+    name = alice.name
+    alice.name = "a"
+    alice.save
+    alice.name = "b"
+    alice.name.should == "b"
+    alice.load
+    alice.name.should == "a"
   end
 end

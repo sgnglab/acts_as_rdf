@@ -82,7 +82,7 @@ describe 'ActsAsRDF' do
       end
 
       it 'should update object via Ruby Class' do
-        @alice.people = [@alice_uri, @bob_uri].map{|u| Person.new(u ,@context) }
+        @alice.people = [@alice_uri, @bob_uri].map{|u| PersonHOS.new(u ,@context) }
         @alice.people.size.should == 2
         @alice.people.first.should be_instance_of(PersonHOS)
         uris = @alice.people.map{|s| s.uri }
