@@ -34,7 +34,7 @@ describe 'ActsAsRDF' do
       rep.has_statement?(
         RDF::Statement.new(@alice_uri, RDF::FOAF.name, @alice_name, :context => @context)).should be_true
 
-      rep.should == Person.repository
+      rep.should == ActsAsRDF.repository
     end
     
     it "should has kind of repository" do

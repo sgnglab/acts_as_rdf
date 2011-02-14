@@ -1,6 +1,15 @@
+# -*- coding: utf-8 -*-
 require 'rdf'
-require 'acts_as_rdf/exceptions'
 require 'spira'
+require 'active_support'
+require 'active_support/Concern'
+
+require 'acts_as_rdf/attribute_methods'
+require 'acts_as_rdf/errors'
+require 'acts_as_rdf/proc_uri'
+require 'acts_as_rdf/type'
+require 'acts_as_rdf/resource'
+
 
 ##
 # ActsAsRDFはRubyの中でRDFデータを簡単に扱うためのライブラリです。
@@ -11,13 +20,6 @@ module ActsAsRDF
 
   @@settings = nil # システムの設定情報を格納する
   @@rand_place = 10000 # ユニークURIを生成する際の最大値
-
-  def self.included(base)
-    base.extend ClassMethods
-    base.class_eval do
-      include InstanceMethods
-    end
-  end
 
   # システム内部で使用する変数を格納するハッシュを返す
   #
@@ -85,6 +87,4 @@ module ActsAsRDF
     end
   end
   module_function :uniq_uri
-
-  autoload :Resource, 'acts_as_rdf/resource'
 end
