@@ -50,4 +50,30 @@ describe 'ActsAsRDF' do
     alice.load
     alice.name.should == "a"
   end
+
+  it "should return nil" do
+    bob_uri = RDF::URI.new('http://bob.com')
+    bob = Person.find(bob_uri, @context)
+    bob.should === nil
+  end
+
+  it "should save resource" do
+    bob_uri = RDF::URI.new('http://bob.com')
+    bob = Person.new(bob_uri, @context)
+    bob.save
+    bob_ = Person.find(bob_uri, @context)
+    bob_.should be_instance_of(Person)
+    bob_.uri.should === bob_uri
+    bob_.context.should == @context
+  end
+
+  it "should save resource" do
+    bob_uri = RDF::URI.new('http://bob.com')
+    bob = Person.new(bob_uri, @context)
+    bob.name = 'bob'
+    bob.save
+    bob_ = Person.find(bob_uri, @context)
+    bob_.should be_instance_of(Person)
+    bob_.name.should == 'bob'
+  end
 end

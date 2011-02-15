@@ -14,6 +14,7 @@ module ActsAsRDF
       self.instance_eval do
         class << self
           attr_accessor :relations
+          @@relations = []
         end
         @relations = []
 
@@ -105,6 +106,9 @@ module ActsAsRDF
       # 関連のデータを保存する
       #
       def save
+        uri = @uri || ActsAsRDF.uniq_uri
+        repository.insert([uri, RDF.type, self.class.type, context])
+
         self.class.relations.each{|rel|
           self.send(self.class._relation_method_names(rel)[:save])
         }

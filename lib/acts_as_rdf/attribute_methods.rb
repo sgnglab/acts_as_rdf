@@ -28,6 +28,7 @@ module ActsAsRDF
           m_names = _relation_method_names(method_name)
           register_relation method_name
           self.send(:define_method, m_names[:save]) do
+            load unless @loaded
             set_objects(property, method_name, type, opt)
           end
           self.send(:define_method, m_names[:set]) do |arg|
@@ -60,6 +61,7 @@ module ActsAsRDF
           m_names = _relation_method_names(method_name)
           register_relation method_name
           self.send(:define_method, m_names[:save]) do
+            load unless @loaded
             set_subjects(property, method_name, type, opt)
           end
           self.send(:define_method, m_names[:set]) do |arg|
