@@ -28,6 +28,8 @@ module ActsAsRDF
 
     include ::RDF
     include AttributeMethods
+    include ActiveModel::AttributeMethods
+    include ActiveModel::Dirty
     include ProcURI
     include Type
     include Spira::Types

@@ -3,7 +3,19 @@ require File.join(File.dirname(__FILE__), 'spec_helper')
 
 # 関連の型変換に関するテスト
 describe 'ActsAsRDF' do
-  before do
+  before(:all) do
+    class PersonT
+      include ActsAsRDF::Resource
+      
+      define_type RDF::FOAF['Person']
+      has_object :name, RDF::FOAF[:name], Spira::Types::String
+      has_object :age, RDF::FOAF[:age], Spira::Types::Integer
+      
+      define_attribute_methods [:name, :age]
+    end
+  end
+  
+  before(:each) do
     @alice_uri = RDF::URI.new('http://ali.ce')
     @alice_name = RDF::Literal.new('Alice')
     @alice_blog = RDF::URI.new('htt://alice.blog.com')
@@ -21,18 +33,11 @@ describe 'ActsAsRDF' do
       r << [@bob_uri, RDF.type, RDF::FOAF['Person'], @context]
       r << [@alice_blog, RDF.type, RDF::FOAF['Document'], @context]
     }
-    
-    class Person
-      include ActsAsRDF::Resource
-      define_type RDF::FOAF['Person']
-      has_object :name, RDF::FOAF[:name], Spira::Types::String
-      has_object :age, RDF::FOAF[:age], Spira::Types::Integer
-    end
   end
 
   context 'with relation type' do
     before do
-      @alice = Person.find(@alice_uri, @context)
+      @alice = PersonT.find(@alice_uri, @context)
     end
 
     it 'should return string' do

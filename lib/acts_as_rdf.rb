@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 require 'rdf'
 require 'spira'
+require 'active_model'
+#require 'active_support/core_ext/class/inheritable_attributes'
 require 'active_support'
 require 'active_support/concern'
 

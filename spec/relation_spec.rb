@@ -27,10 +27,13 @@ describe 'ActsAsRDF' do
     before do
       class PersonHOS
         include ActsAsRDF::Resource
+
         define_type RDF::FOAF['Person']
         has_objects :homepages, RDF::FOAF.homepage
         has_objects :names, RDF::FOAF.name, String
         has_objects :people, RDF::FOAF.knows, 'PersonHOS'
+
+        define_attribute_methods [:homepages, :names, :people]
       end
       @alice = PersonHOS.find(@alice_uri, @context)
     end
@@ -94,8 +97,11 @@ describe 'ActsAsRDF' do
     it "should return relations" do
       class PersonHOS2
         include ActsAsRDF::Resource
+
         define_type RDF::FOAF['Person']
         has_objects :homepages, RDF::FOAF.homepage
+
+        define_attribute_methods [:homepages]
       end
       PersonHOS2.relations.should == [:homepages]
       PersonHOS.relations.should == [:homepages, :names, :people]
@@ -106,10 +112,13 @@ describe 'ActsAsRDF' do
     before do
       class PersonHO
         include ActsAsRDF::Resource
+        
         define_type RDF::FOAF['Person']
         has_object :name, RDF::FOAF.name, String
         has_object :homepage, RDF::FOAF.homepage
         has_object :person, RDF::FOAF.knows, 'PersonHO'
+
+        define_attribute_methods [:name, :homepage, :person]
       end
       @alice = PersonHO.find(@alice_uri, @context)
     end
@@ -157,14 +166,20 @@ describe 'ActsAsRDF' do
     before do
       class PersonHSS
         include ActsAsRDF::Resource
+
         define_type RDF::FOAF['Person']
         has_subjects :people, RDF::FOAF[:knows]
+
+        define_attribute_methods [:people]
       end
       class BlogHSS
         include ActsAsRDF::Resource
+
         define_type RDF::FOAF['Document']
         has_subjects :authors, RDF::FOAF[:homepage]
         has_subjects :authors2, RDF::FOAF[:homepage], "PersonHSS"
+
+        define_attribute_methods [:authors, :authors2]
       end
       @blog = BlogHSS.find(@alice_blog, @context)
     end
@@ -216,13 +231,19 @@ describe 'ActsAsRDF' do
     before do
       class PersonHS
         include ActsAsRDF::Resource
+
         define_type RDF::FOAF['Person']
         has_subject :person, RDF::FOAF[:knows]
+
+        define_attribute_methods [:person]
       end
       class BlogHS
         include ActsAsRDF::Resource
+
         define_type RDF::FOAF['Document']
         has_subject :author, RDF::FOAF.homepage, "PersonHS"
+
+        define_attribute_methods [:author]
       end
       @bob = PersonHS.find(@bob_uri, @context)
       @blog = BlogHS.find(@alice_blog, @context)

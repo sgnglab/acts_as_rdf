@@ -15,15 +15,15 @@ describe 'ActsAsRDF' do
       r << [@alice_uri, RDF.type, RDF::FOAF['Person'], @context]
     }
 
-    class Person
+    class PersonA
       include ActsAsRDF::Resource
       define_type RDF::FOAF['Person']
     end
   end
 
   it "should be return serialized uri" do
-    alice = Person.find(@alice_uri, @context)
-    alice.id.should == Person.encode_uri(@alice_uri)
+    alice = PersonA.find(@alice_uri, @context)
+    alice.id.should == PersonA.encode_uri(@alice_uri)
     alice.id.should == alice.encode_uri
   end
 

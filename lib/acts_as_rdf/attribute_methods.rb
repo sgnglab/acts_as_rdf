@@ -34,6 +34,7 @@ module ActsAsRDF
           self.send(:define_method, m_names[:set]) do |arg|
             load unless @loaded
             _set_attr(method_name, arg)
+            __send__("#{method_name}_will_change!")
           end
           self.send(:define_method, m_names[:load]) do
             get_objects(method_name, property, type, opt)
@@ -67,6 +68,7 @@ module ActsAsRDF
           self.send(:define_method, m_names[:set]) do |arg|
             load unless @loaded
             _set_attr(method_name, arg)
+            __send__("#{method_name}_will_change!")
           end
           self.send(:define_method, m_names[:load]) do
             get_subjects(method_name, property, type, opt)
@@ -99,10 +101,16 @@ module ActsAsRDF
         def register_relation(relation_name)
           @relations << relation_name
         end
-        
       end
 
       module InstanceMethods
+        # 属性(関連)名の一覧を返す
+        # 
+        # @param [Array<Symbol>] 属性名の一覧
+        def attributes
+          self.class.relations
+        end
+
         private
         # @param [RDF::URI] property
         # @param [String, Spira::Type] type
