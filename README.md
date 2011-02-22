@@ -4,7 +4,7 @@ ActiveModelのクラスにRDFの入出力機能を加えるライブラリ
 
 ---
 
-### 概要
+## 概要
 以下のようにして利用します。
 
     ActsAsRDF.repository = RDF::Repository
@@ -13,6 +13,7 @@ ActiveModelのクラスにRDFの入出力機能を加えるライブラリ
       include ActsAsRDF
       define_type RDF::FOAF[:Person]
       has_objects :friends, RDF::FOAF[:knows]
+      define_attribute_methods [:friends]
     end
     
     alice = Person.find(RDF::URI.new('http://ali.ce/'), RDF::URI.new('http://context.com'))
@@ -24,7 +25,15 @@ ActiveModelのクラスにRDFの入出力機能を加えるライブラリ
 #### has\_object(s), has_subject(s)
 このRubyクラスのURIと結び付けられているノードと関連を定義します。
 
-### 関連
+#### define\_attribute\_methods
+has\_object(s)などで定めた関連を列挙します。
+
+参照:
+
+ * ActiveModel::AttributeMethods <http://api.rubyonrails.org/classes/ActiveModel/AttributeMethods.html>
+ * ActiveModel::Dirty <http://api.rubyonrails.org/classes/ActiveModel/Dirty.html>
+
+## 関連
 対象のクラスのインスタンスを起点とした関連を定義可能です。
 
 #### has_object(s)
@@ -59,7 +68,7 @@ has_object(s)の引数は以下のようになっています:
 #### has_subject(s)
 このクラスを目的語として、任意のプロパティの主語の主語を取得/更新します。インタフェースなどはhas_object(s)と同じです。
 
-### 型
+## 型
 関連の値の型を指定することができます。また、ActsAsRDFを組み込んだRubyクラスも指定に使うことができます。
 
     has_object  :homepage, RDF::FOAF[:homepage]        # デフォルトではRDF::URI
@@ -67,6 +76,23 @@ has_object(s)の引数は以下のようになっています:
     has_objects :friends,  RDF::FOAF[:knows], 'Person' # ActsAsRDFを組み込んだPerson
 
 Spira <https://github.com/datagraph/spira>
-  
-### 'License'
+
+## ActiveModelへの対応(予定)
+ActiveModelはRubyのクラスをActiveRecordっぽく使うためのライブラリです。
+以下のようなモジュールで構成されています。
+ActsAsRDFではこれらへの対応を予定しています。
+
+ * Validations: 値の検証
+ * Serialization: .to_jsonなどのシリアライゼーションのサポート
+ * AttributeMethods: 属性を容易に追加するもの
+ * Callbacks: ActiveRecordスタイルのコールバック
+ * Dirty: 値の変更のトラッキングのサポート
+ * Naming: model.model_nameのデフォルトの実装(これはActionPackで使用される)
+ * Observing: ActiveRecordスタイルのオブザーバ
+ * StateMachine: シンプルなステートマシンの実装
+ * Translation: 他言語化のサポート
+
+参照: <http://yehudakatz.com/2010/01/10/activemodel-make-any-ruby-object-feel-like-activerecord/>
+
+## 'License'
 Copyright (c) 2010 [name of plugin creator], released under the MIT license
