@@ -88,9 +88,9 @@ describe 'ActsAsRDF' do
   
   context 'create resource' do
     it 'should create resource' do
-      person = Person.create(@context)
-      person.should be_instance_of Person
-      res = Person.find(person.uri, @context)
+      person = PersonA.create(@context)
+      person.should be_instance_of PersonA
+      res = PersonA.find(person.uri, @context)
       res.should be_true
     end
     it 'should not create resource' do

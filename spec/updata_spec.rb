@@ -66,8 +66,8 @@ describe 'ActsAsRDF' do
     bob_uri = RDF::URI.new('http://bob.com')
     bob = PersonUpdate.new(bob_uri, @context)
     bob.save
-    bob_ = Person.find(bob_uri, @context)
-    bob_.should be_instance_of(Person)
+    bob_ = PersonUpdate.find(bob_uri, @context)
+    bob_.should be_instance_of(PersonUpdate)
     bob_.uri.should === bob_uri
     bob_.context.should == @context
   end
