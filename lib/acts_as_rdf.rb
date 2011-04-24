@@ -2,7 +2,7 @@
 require 'rdf'
 require 'spira'
 require 'active_support'
-require 'active_support/Concern'
+require 'active_support/concern'
 
 require 'acts_as_rdf/attribute_methods'
 require 'acts_as_rdf/errors'
