@@ -7,6 +7,7 @@ require 'active_support'
 require 'active_support/concern'
 
 require 'acts_as_rdf/attribute_methods'
+require 'acts_as_rdf/callbacks'
 require 'acts_as_rdf/errors'
 require 'acts_as_rdf/proc_uri'
 require 'acts_as_rdf/type'

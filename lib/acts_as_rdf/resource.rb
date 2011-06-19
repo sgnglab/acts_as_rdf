@@ -33,6 +33,7 @@ module ActsAsRDF
     include ProcURI
     include Type
     include Spira::Types
+    include Callbacks
 
     module ClassMethods
       ##
@@ -67,8 +68,11 @@ module ActsAsRDF
       # @param [self]
       def create(context)
         uri = ActsAsRDF.uniq_uri
-        ActsAsRDF.repository.insert([uri, RDF.type, self.type, context])
-        self.new(uri,context)
+        new = self.new(uri,context)
+        new.run_callbacks(:create) do
+          ActsAsRDF.repository.insert([uri, RDF.type, self.type, context])
+        end
+        new
       end
     end
     
