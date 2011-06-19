@@ -99,6 +99,11 @@ describe 'ActsAsRDF' do
     end
   end
 
+  context '#persisted' do
+    it { PersonA.create(@context).persisted?.should be_true }
+    it { PersonA.new(@context,@context).persisted?.should be_false }
+  end
+
   context 'generate uniq_uri' do
     it "should return RDF:URI" do
       ActsAsRDF.uniq_uri.should be_instance_of(RDF::URI)

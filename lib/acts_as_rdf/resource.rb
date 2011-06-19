@@ -71,6 +71,7 @@ module ActsAsRDF
         new = self.new(uri,context)
         new.run_callbacks(:create) do
           ActsAsRDF.repository.insert([uri, RDF.type, self.type, context])
+          new.save
         end
         new
       end
@@ -90,6 +91,14 @@ module ActsAsRDF
         @context = context
         @attr = {}
         @loaded = false
+        @new_record = true
+      end
+
+      # このインスタンスが保存されたものであるかを返す
+      #
+      # @return [True | False]
+      def new_record?
+        @new_record
       end
 
       # このクラスの識別子を返す
@@ -107,6 +116,8 @@ module ActsAsRDF
           self.send(self.class._relation_method_names(rel)[:load])
         }
         @loaded = true
+        @new_record = false
+        true
       end
 
       # 関連のデータを保存する
@@ -119,6 +130,8 @@ module ActsAsRDF
           self.send(self.class._relation_method_names(rel)[:save])
         }
         load
+        @new_record = false
+        true
       end
 
       #
@@ -127,16 +140,12 @@ module ActsAsRDF
         ActsAsRDF.repository
       end
       
-      private
-      
       # 永続するデータかどうかの確認
-      # このクラスのものはRDF::Repositoryに保存されるはずなので
-      # trueを返す
       # 
       # @return [true]
       # @see http://api.rubyonrails.org/classes/ActiveModel/Conversion.html
       def persisted?
-        true
+        ! new_record?
       end
     end
   end
