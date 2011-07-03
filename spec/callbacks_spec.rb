@@ -10,7 +10,7 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
       define_type RDF::FOAF['Person']
       has_object :name, RDF::FOAF['names'], String
 
-      define_attribute_methods [:name]
+      init_attribute_methods
     end
   end
   

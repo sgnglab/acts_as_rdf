@@ -18,7 +18,8 @@ describe 'ActsAsRDF' do
     class PersonA
       include ActsAsRDF::Resource
       define_type RDF::FOAF['Person']
-      define_attribute_methods []
+
+      init_attribute_methods
     end
   end
 

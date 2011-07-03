@@ -13,7 +13,7 @@ ActiveModelのクラスにRDFの入出力機能を加えるライブラリ
       include ActsAsRDF
       define_type RDF::FOAF[:Person]
       has_objects :friends, RDF::FOAF[:knows]
-      define_attribute_methods [:friends]
+      init_attribute_methods # クラス定義の最後に記述するおまじない
     end
     
     alice = Person.find(RDF::URI.new('http://ali.ce/'), RDF::URI.new('http://context.com'))

@@ -33,7 +33,7 @@ describe 'ActsAsRDF' do
         has_objects :names, RDF::FOAF.name, String
         has_objects :people, RDF::FOAF.knows, 'PersonHOS'
 
-        define_attribute_methods [:homepages, :names, :people]
+        init_attribute_methods
       end
       @alice = PersonHOS.find(@alice_uri, @context)
     end
@@ -101,7 +101,7 @@ describe 'ActsAsRDF' do
         define_type RDF::FOAF['Person']
         has_objects :homepages, RDF::FOAF.homepage
 
-        define_attribute_methods [:homepages]
+        init_attribute_methods
       end
       PersonHOS2.relations.should == [:homepages]
       PersonHOS.relations.should == [:homepages, :names, :people]
@@ -118,7 +118,7 @@ describe 'ActsAsRDF' do
         has_object :homepage, RDF::FOAF.homepage
         has_object :person, RDF::FOAF.knows, 'PersonHO'
 
-        define_attribute_methods [:name, :homepage, :person]
+        init_attribute_methods
       end
       @alice = PersonHO.find(@alice_uri, @context)
     end
@@ -170,7 +170,7 @@ describe 'ActsAsRDF' do
         define_type RDF::FOAF['Person']
         has_subjects :people, RDF::FOAF[:knows]
 
-        define_attribute_methods [:people]
+        init_attribute_methods
       end
       class BlogHSS
         include ActsAsRDF::Resource
@@ -179,7 +179,7 @@ describe 'ActsAsRDF' do
         has_subjects :authors, RDF::FOAF[:homepage]
         has_subjects :authors2, RDF::FOAF[:homepage], "PersonHSS"
 
-        define_attribute_methods [:authors, :authors2]
+        init_attribute_methods
       end
       @blog = BlogHSS.find(@alice_blog, @context)
     end
@@ -235,7 +235,7 @@ describe 'ActsAsRDF' do
         define_type RDF::FOAF['Person']
         has_subject :person, RDF::FOAF[:knows]
 
-        define_attribute_methods [:person]
+        init_attribute_methods
       end
       class BlogHS
         include ActsAsRDF::Resource
@@ -243,7 +243,7 @@ describe 'ActsAsRDF' do
         define_type RDF::FOAF['Document']
         has_subject :author, RDF::FOAF.homepage, "PersonHS"
 
-        define_attribute_methods [:author]
+        init_attribute_methods
       end
       @bob = PersonHS.find(@bob_uri, @context)
       @blog = BlogHS.find(@alice_blog, @context)
