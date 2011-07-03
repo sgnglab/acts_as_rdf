@@ -75,4 +75,34 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
       end
     end
   end
+
+  describe ".before_save" do
+    before do
+      class PersonCallbacksBeforeSave
+        include ActsAsRDF::Resource
+        attr_accessor :logger
+        
+        define_type RDF::FOAF['Person']
+        has_object :name, RDF::FOAF['names'], String
+        
+        before_save :action_before_save
+        def action_before_save
+          @logger = "" unless @logger
+          @logger += '+before_save'
+        end
+
+        init_attribute_methods
+      end
+    end
+
+    context "create" do
+      it "should be called" do
+        @person = PersonCallbacksBeforeSave.create(@context)
+        
+        @person.logger.should == '+before_save'
+        @person.save.should == true
+        @person.persisted?.should == true
+      end
+    end
+  end
 end

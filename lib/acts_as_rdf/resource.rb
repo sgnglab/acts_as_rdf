@@ -69,9 +69,11 @@ module ActsAsRDF
       def create(context)
         uri = ActsAsRDF.uniq_uri
         new = self.new(uri,context)
-        new.run_callbacks(:create) do
-          ActsAsRDF.repository.insert([uri, RDF.type, self.type, context])
-          new.save
+        new.run_callbacks(:save) do
+          new.run_callbacks(:create) do
+            ActsAsRDF.repository.insert([uri, RDF.type, self.type, context])
+            new.save
+          end
         end
         new
       end

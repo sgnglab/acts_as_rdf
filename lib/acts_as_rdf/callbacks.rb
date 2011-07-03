@@ -8,7 +8,7 @@ module ActsAsRDF
         extend ActiveModel::Callbacks
         include ActiveModel::Validations::Callbacks
 
-        define_model_callbacks :create #, :destroy, :save, :update
+        define_model_callbacks :create, :save #, :destroy, :save, :update
       end
     end
   end
