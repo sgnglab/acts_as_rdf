@@ -11,7 +11,7 @@ describe 'ActsAsRDF' do
       has_object :name, RDF::FOAF[:name], Spira::Types::String
       has_object :age, RDF::FOAF[:age], Spira::Types::Integer
       
-      define_attribute_methods [:name, :age]
+      init_attribute_methods
     end
   end
   

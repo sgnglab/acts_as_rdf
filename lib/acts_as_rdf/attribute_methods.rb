@@ -101,6 +101,14 @@ module ActsAsRDF
         def register_relation(relation_name)
           @relations << relation_name
         end
+
+        # 関連に応じたメソッドを作成する
+        #
+        # @see http://api.rubyonrails.org/classes/ActiveModel/AttributeMethods/ClassMethods.html#method-i-define_attribute_methods
+
+        def init_attributes_methods
+          define_attribute_methods relations
+        end
       end
 
       module InstanceMethods

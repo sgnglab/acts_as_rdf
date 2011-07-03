@@ -13,7 +13,7 @@ describe 'ActsAsRDF' do
       has_object :name, RDF::FOAF[:name], String
       has_subjects :known_to, RDF::FOAF[:knows], PersonUpdate
       
-      define_attribute_methods [:name, :known_to]
+      init_attribute_methods
     end
   end
 
