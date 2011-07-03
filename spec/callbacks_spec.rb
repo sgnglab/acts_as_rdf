@@ -2,37 +2,28 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
 describe 'ActsAsRDF::ResourceにおけるDirty' do
-  before(:all) do
-    class PersonCallbacks
-      include ActsAsRDF::Resource
-      attr_accessor :logger
-      
-      define_type RDF::FOAF['Person']
-      has_object :name, RDF::FOAF['names'], String
-
-      init_attribute_methods
-    end
-  end
-  
   before(:each) do
     @alice_uri = RDF::URI.new('http://ali.ce')
     @alice_name = RDF::Literal.new('Alice')
-    @alice_blog = RDF::URI.new('htt://alice.blog.com')
-
     @context = RDF::URI.new('http://context.com')
 
     ActsAsRDF.repository = RDF::Repository.new{|r|
-      r << [@alice_uri, RDF::FOAF.name, 'wrong_name']
       r << [@alice_uri, RDF::FOAF.name, @alice_name, @context]
-      r << [@alice_uri, RDF::FOAF.homepage, @alice_blog, @context]
       r << [@alice_uri, RDF.type, RDF::FOAF['Person'], @context]
-      r << [@alice_blog, RDF.type, RDF::FOAF['Document'], @context]
     }
-    @alice = PersonCallbacks.find(@alice_uri, @context)
   end
 
   describe ".included" do
     before do
+      class PersonCallbacks
+        include ActsAsRDF::Resource
+        attr_accessor :logger
+        
+        define_type RDF::FOAF['Person']
+        has_object :name, RDF::FOAF['names'], String
+        
+        init_attribute_methods
+      end
       @class = PersonCallbacks
     end
     it "includes the before_create callback" do
@@ -48,18 +39,25 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
 
   describe ".before_create" do
     before do
-      class PersonCallbacks
+      class PersonCallbacksBeforeCreate
+        include ActsAsRDF::Resource
+        attr_accessor :logger
+        
+        define_type RDF::FOAF['Person']
+        has_object :name, RDF::FOAF['names'], String
+
         before_create :action_before_create
         def action_before_create
           @logger = "" unless @logger
           @logger += '+before_create'
         end
+        init_attribute_methods
       end
     end
 
     context "create" do
       it "should be called" do
-        @person = PersonCallbacks.create(@context)
+        @person = PersonCallbacksBeforeCreate.create(@context)
         
         @person.logger.should == '+before_create'
         @person.save.should == true
@@ -69,9 +67,10 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
 
     context "update" do
       it "should not be called" do
-        @alice.name = "new_name"
-        @alice.save.should == true
-        @alice.logger.should == nil
+        @person = PersonCallbacksBeforeCreate.find(@alice_uri,@context)
+        @person.name = "new_name"
+        @person.save.should == true
+        @person.logger.should == nil
       end
     end
   end
