@@ -8,14 +8,9 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
       attr_accessor :logger
       
       define_type RDF::FOAF['Person']
-      has_objects :names, RDF::FOAF['names'], String
+      has_object :name, RDF::FOAF['names'], String
 
-      before_create :action_before_create
-      def action_before_create
-        @logger = 'action_before_create'
-      end
-      
-      define_attribute_methods [:names]
+      define_attribute_methods [:name]
     end
   end
   
@@ -52,13 +47,31 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
   end
 
   describe ".before_create" do
-    context "callback returns true" do
-      it "should get saved" do
+    before do
+      class PersonCallbacks
+        before_create :action_before_create
+        def action_before_create
+          @logger = "" unless @logger
+          @logger += '+before_create'
+        end
+      end
+    end
+
+    context "create" do
+      it "should be called" do
         @person = PersonCallbacks.create(@context)
         
-        @person.logger.should == 'action_before_create'
+        @person.logger.should == '+before_create'
         @person.save.should == true
         @person.persisted?.should == true
+      end
+    end
+
+    context "update" do
+      it "should not be called" do
+        @alice.name = "new_name"
+        @alice.save.should == true
+        @alice.logger.should == nil
       end
     end
   end
