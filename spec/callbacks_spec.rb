@@ -179,4 +179,55 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
       end
     end
   end
+
+  describe ".before_initialize" do
+    before do
+      class PersonCallbacksBeforeInitialize
+        include ActsAsRDF::Resource
+        attr_accessor :logger
+        
+        define_type RDF::FOAF['Person']
+        
+        before_initialize :action_before_initialize
+        def action_before_initialize
+          @logger = "" unless @logger
+          @logger += '+before_initialize'
+        end
+
+        init_attribute_methods
+      end
+    end
+
+    context "new" do
+      it "should be called" do
+        person = PersonCallbacksBeforeInitialize.new(ActsAsRDF.uniq_uri,@context)
+        
+        person.logger.should == '+before_initialize'
+      end
+    end
+
+    context "create" do
+      it "should be called" do
+        person = PersonCallbacksBeforeInitialize.create(@context)
+        
+        person.logger.should == '+before_initialize'
+      end
+    end
+
+    context "save" do
+      it "should be called" do
+        person = PersonCallbacksBeforeInitialize.new(ActsAsRDF.uniq_uri,@context)
+        
+        person.save.should == true
+        person.logger.should == '+before_initialize'
+      end
+    end
+
+    context "update" do
+      it "should be called" do
+        alice = PersonCallbacksBeforeInitialize.find(@alice_uri,@context)
+        alice.logger.should == '+before_initialize'
+      end
+    end
+  end
 end

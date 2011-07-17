@@ -94,12 +94,14 @@ module ActsAsRDF
       # @param [RDF::URI] context (メタデータシステムの場合、通常は Project#context の値)
       # @return [self]
       def initialize(uri, context)
-        raise unless uri && context
-        @uri = uri
-        @context = context
-        @attr = {}
-        @loaded = false
-        @new_record = true
+        run_callbacks(:initialize) do
+          raise unless uri && context
+          @uri = uri
+          @context = context
+          @attr = {}
+          @loaded = false
+          @new_record = true
+        end
       end
 
       # このクラスの識別子を返す
