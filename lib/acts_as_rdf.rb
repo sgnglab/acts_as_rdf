@@ -11,8 +11,8 @@ require 'acts_as_rdf/callbacks'
 require 'acts_as_rdf/errors'
 require 'acts_as_rdf/proc_uri'
 require 'acts_as_rdf/type'
+require 'acts_as_rdf/validations'
 require 'acts_as_rdf/resource'
-
 
 ##
 # ActsAsRDFはRubyの中でRDFデータを簡単に扱うためのライブラリです。

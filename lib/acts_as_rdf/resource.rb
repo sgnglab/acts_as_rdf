@@ -32,6 +32,7 @@ module ActsAsRDF
     include ActiveModel::Dirty
     include ProcURI
     include Type
+    include Validations
     include Spira::Types
     include Callbacks
 
