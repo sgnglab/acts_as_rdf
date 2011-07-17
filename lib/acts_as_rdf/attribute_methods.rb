@@ -106,6 +106,7 @@ module ActsAsRDF
         #
         # @see http://api.rubyonrails.org/classes/ActiveModel/AttributeMethods/ClassMethods.html#method-i-define_attribute_methods
 
+
         def init_attribute_methods
           define_attribute_methods relations
         end
