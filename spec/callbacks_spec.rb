@@ -77,7 +77,7 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
     context "save" do
       it "should be called" do
         @person = PersonCallbacksBeforeCreate.new(ActsAsRDF.uniq_uri,@context)
-#        @person.name = "new_name"
+        @person.name = "new_name"
         @person.persisted?.should be_false
         @person.save.should be_true
         @person.logger.should == '+before_create'

@@ -28,11 +28,9 @@ module ActsAsRDF
           m_names = _relation_method_names(method_name)
           register_relation method_name
           self.send(:define_method, m_names[:save]) do
-            load unless @loaded
             set_objects(property, method_name, type, opt)
           end
           self.send(:define_method, m_names[:set]) do |arg|
-            load unless @loaded
             _set_attr(method_name, arg)
             __send__("#{method_name}_will_change!")
           end
@@ -40,7 +38,9 @@ module ActsAsRDF
             get_objects(method_name, property, type, opt)
           end
           self.send(:define_method, m_names[:get]) do
-            load unless @loaded
+            unless @attr[method_name]
+              _set_attr(method_name, opt[:single] == false ? [] : nil)
+            end
             @attr[method_name]
           end
         end
@@ -62,11 +62,9 @@ module ActsAsRDF
           m_names = _relation_method_names(method_name)
           register_relation method_name
           self.send(:define_method, m_names[:save]) do
-            load unless @loaded
             set_subjects(property, method_name, type, opt)
           end
           self.send(:define_method, m_names[:set]) do |arg|
-            load unless @loaded
             _set_attr(method_name, arg)
             __send__("#{method_name}_will_change!")
           end
@@ -74,7 +72,9 @@ module ActsAsRDF
             get_subjects(method_name, property, type, opt)
           end
           self.send(:define_method, m_names[:get]) do
-            load unless @loaded
+            unless @attr[method_name]
+              _set_attr(method_name, opt[:single] == false ? [] : nil)
+            end
             @attr[method_name]
           end
         end
@@ -138,10 +138,10 @@ module ActsAsRDF
         def set_objects(property, method_name, type=nil, opt={:single=>false})
           delete_objects(property)
           if opt[:single]
-            object = build_rdf_value(@attr[method_name], type)
+            object = build_rdf_value(send(method_name), type)
             repository.insert([uri, property, object, context])
           else
-            @attr[method_name].each do |object|
+            send(method_name).each do |object|
               object = build_rdf_value(object, type)
               repository.insert([uri, property, object, context])
             end
@@ -171,10 +171,10 @@ module ActsAsRDF
         def set_subjects(property, method_name, type=nil, opt={:single=>false})  
           delete_subjects(property)
           if opt[:single]
-            resource = build_rdf_value(@attr[method_name], type)
+            resource = build_rdf_value(send(method_name), type)
             repository.insert([resource, property, uri, context])
           else
-            @attr[method_name].each do |resource|
+            send(method_name).each do |resource|
               resource = build_rdf_value(resource, type)
               repository.insert([resource, property, uri, context])
             end
