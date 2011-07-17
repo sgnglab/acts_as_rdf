@@ -127,11 +127,10 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
 
     context "update" do
       it "should be called" do
-        person = PersonCallbacksBeforeSave.create(@context)
-        new_person = PersonCallbacksBeforeSave.find(person.uri,@context)
+        alice = PersonCallbacksBeforeSave.find(@alice_uri,@context)
 
-        new_person.save.should == true
-        person.logger.should == '+before_save'
+        alice.save.should == true
+        alice.logger.should == '+before_save'
       end
     end
   end
