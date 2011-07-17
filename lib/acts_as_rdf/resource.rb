@@ -58,7 +58,13 @@ module ActsAsRDF
       # @param [self, nil]
       def find(uri, context)
         res = ActsAsRDF.repository.query([uri, RDF.type, type, context]).map do |x| end
-        res.empty? ? nil : self.new(uri, context)
+        if res.empty?
+          nil
+        else
+          found = self.new(uri, context)
+          found.load
+          found
+        end
       end
       
       # このクラスのインスタンスをレポジトリに登録する
@@ -96,13 +102,6 @@ module ActsAsRDF
         @new_record = true
       end
 
-      # このインスタンスが保存されたものであるかを返す
-      #
-      # @return [True | False]
-      def new_record?
-        @new_record
-      end
-
       # このクラスの識別子を返す
       # 識別子は、URIを16進文字列で表現した文字列である
       #
@@ -118,7 +117,7 @@ module ActsAsRDF
           self.send(self.class._relation_method_names(rel)[:load])
         }
         @loaded = true
-        @new_record = false
+        _persisted!
         true
       end
 
@@ -144,7 +143,7 @@ module ActsAsRDF
       # @return [true]
       # @see http://api.rubyonrails.org/classes/ActiveModel/Conversion.html
       def persisted?
-        ! new_record?
+        ! @new_record
       end
 
       # 関連のデータを実際に保存する
@@ -157,8 +156,16 @@ module ActsAsRDF
           self.send(self.class._relation_method_names(rel)[:save])
         }
         load
-        @new_record = false
+        _persisted!
         true
+      end
+
+      private
+      # このデータが永続データであることを宣言する
+      # 
+      # @return [true]
+      def _persisted!
+        @new_record = false
       end
     end
   end

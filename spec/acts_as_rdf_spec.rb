@@ -85,7 +85,7 @@ describe 'ActsAsRDF' do
     it "cannot call find method" do
       lambda{ PersonFind.find }.should raise_error(ArgumentError)
       lambda{ PersonFind.find(@alice_uri) }.should raise_error(ArgumentError)
-    end   
+    end
   end
   
   context 'create resource' do
@@ -103,6 +103,7 @@ describe 'ActsAsRDF' do
   context '#persisted' do
     it { PersonA.create(@context).persisted?.should be_true }
     it { PersonA.new(@context,@context).persisted?.should be_false }
+    it { PersonA.find(@alice_uri,@context).persisted?.should be_true }
   end
 
   context 'generate uniq_uri' do
