@@ -114,5 +114,25 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
         @person.persisted?.should == true
       end
     end
+
+    context "save" do
+      it "should be called" do
+        person = PersonCallbacksBeforeSave.new(ActsAsRDF.uniq_uri,@context)
+
+        person.save.should == true        
+        person.logger.should == '+before_save'
+        person.persisted?.should == true
+      end
+    end
+
+    context "update" do
+      it "should be called" do
+        person = PersonCallbacksBeforeSave.create(@context)
+        new_person = PersonCallbacksBeforeSave.find(person.uri,@context)
+
+        new_person.save.should == true
+        person.logger.should == '+before_save'
+      end
+    end
   end
 end
