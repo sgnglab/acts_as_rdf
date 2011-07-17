@@ -28,6 +28,13 @@ describe 'ActsAsRDF' do
       r << [@alice_uri, RDF.type, RDF::FOAF['Person'], @context]
     }
   end
+
+  it "should not change persisted?" do
+    bob = PersonUpdate.new(ActsAsRDF.uniq_uri, @context)
+    bob.persisted?.should be_false
+    bob.name = 'bob'
+    bob.persisted?.should be_false
+  end
   
   it "should be return cache" do
     alice = PersonUpdate.find(@alice_uri, @context)

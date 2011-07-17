@@ -72,7 +72,7 @@ module ActsAsRDF
         new.run_callbacks(:save) do
           new.run_callbacks(:create) do
             ActsAsRDF.repository.insert([uri, RDF.type, self.type, context])
-            new.save
+            new._save
           end
         end
         new
@@ -125,15 +125,12 @@ module ActsAsRDF
       # 関連のデータを保存する
       #
       def save
-        uri = @uri || ActsAsRDF.uniq_uri
-        repository.insert([uri, RDF.type, self.class.type, context])
-
-        self.class.relations.each{|rel|
-          self.send(self.class._relation_method_names(rel)[:save])
-        }
-        load
-        @new_record = false
-        true
+        run_callbacks(:save) do
+          call_type = persisted? ? :update : :create
+          run_callbacks(call_type) do
+            _save
+          end
+        end
       end
 
       #
@@ -148,6 +145,20 @@ module ActsAsRDF
       # @see http://api.rubyonrails.org/classes/ActiveModel/Conversion.html
       def persisted?
         ! new_record?
+      end
+
+      # 関連のデータを実際に保存する
+      #
+      def _save
+        uri = @uri || ActsAsRDF.uniq_uri
+        repository.insert([uri, RDF.type, self.class.type, context])
+            
+        self.class.relations.each{|rel|
+          self.send(self.class._relation_method_names(rel)[:save])
+        }
+        load
+        @new_record = false
+        true
       end
     end
   end
