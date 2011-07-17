@@ -135,4 +135,49 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
       end
     end
   end
+
+  describe ".before_update" do
+    before do
+      class PersonCallbacksBeforeUpdate
+        include ActsAsRDF::Resource
+        attr_accessor :logger
+        
+        define_type RDF::FOAF['Person']
+        
+        before_update :action_before_update
+        def action_before_update
+          @logger = "" unless @logger
+          @logger += '+before_update'
+        end
+
+        init_attribute_methods
+      end
+    end
+
+    context "create" do
+      it "should not be called" do
+        @person = PersonCallbacksBeforeUpdate.create(@context)
+        
+        @person.logger.should == nil
+      end
+    end
+
+    context "save" do
+      it "should not be called" do
+        person = PersonCallbacksBeforeUpdate.new(ActsAsRDF.uniq_uri,@context)
+        
+        person.save.should == true
+        person.logger.should == nil
+      end
+    end
+
+    context "update" do
+      it "should be called" do
+        alice = PersonCallbacksBeforeUpdate.find(@alice_uri,@context)
+
+        alice.save.should == true
+        alice.logger.should == '+before_update'
+      end
+    end
+  end
 end
