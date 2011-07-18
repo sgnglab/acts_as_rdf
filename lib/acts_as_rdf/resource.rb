@@ -28,13 +28,15 @@ module ActsAsRDF
 
     include ::RDF
     include AttributeMethods
-    include ActiveModel::AttributeMethods
-    include ActiveModel::Dirty
     include ProcURI
     include Type
     include Validations
     include Spira::Types
     include Callbacks
+    include ActiveModel::AttributeMethods
+    include ActiveModel::Dirty
+    include ActiveModel::Naming
+    include ActiveModel::Conversion
 
     module ClassMethods
       ##
