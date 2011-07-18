@@ -102,7 +102,6 @@ module ActsAsRDF
           @uri = uri
           @context = context
           @attr = {}
-          @loaded = false
           @new_record = true
         end
       end
@@ -121,7 +120,6 @@ module ActsAsRDF
         self.class.relations.each{|rel|
           self.send(self.class._relation_method_names(rel)[:load])
         }
-        @loaded = true
         _persisted!
         true
       end
