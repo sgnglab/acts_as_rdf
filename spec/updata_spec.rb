@@ -11,7 +11,7 @@ describe 'ActsAsRDF' do
       
       define_type RDF::FOAF['Person']
       has_object :name, RDF::FOAF[:name], String
-      has_subjects :known_to, RDF::FOAF[:knows], PersonUpdate
+      has_subjects :known_to, RDF::FOAF[:knows], "PersonUpdate"
       
       init_attribute_methods
     end
@@ -21,11 +21,18 @@ describe 'ActsAsRDF' do
     @alice_uri = RDF::URI.new('http://ali.ce')
     @alice_name = RDF::Literal.new('Alice')
 
+    @bob_uri = RDF::URI.new('http://bo.b')
+    @bob_name = RDF::Literal.new('Bob')
+
     @context = RDF::URI.new('http://context.com')
 
     ActsAsRDF.repository = RDF::Repository.new{|r|
-      r << [@alice_uri, RDF::FOAF.name, @alice_name, @context]
       r << [@alice_uri, RDF.type, RDF::FOAF['Person'], @context]
+      r << [@alice_uri, RDF::FOAF.name, @alice_name, @context]
+      r << [@bob_uri, RDF.type, RDF::FOAF['Person'], @context]
+      r << [@bob_uri, RDF::FOAF.name, @bob_name, @context]
+      r << [@bob_uri, RDF::FOAF.knows, @alice_uri, @context]
+      r << [@alice_uri, RDF::FOAF.knows, @bob_uri, @context]
     }
   end
 
@@ -43,24 +50,50 @@ describe 'ActsAsRDF' do
     alice.name.should == name
   end
 
-  it "should not return cache if reloaded" do
-    alice = PersonUpdate.find(@alice_uri, @context)
-    name = alice.name
-    alice.name = "a"
-    alice.name.should == "a"
-    alice.load
-    alice.name.should == name
-  end
+  context "load" do
+    it "should not return cache if reloaded" do
+      alice = PersonUpdate.find(@alice_uri, @context)
+      name = alice.name
+      alice.name = "a"
+      alice.name.should == "a"
+      alice.load
+      alice.name.should == name
+    end
+    
+    it "should update" do
+      alice = PersonUpdate.find(@alice_uri, @context)
+      name = alice.name
+      alice.name = "a"
+      alice.save
+      alice.name = "b"
+      alice.name.should == "b"
+      alice.load
+      alice.name.should == "a"
+    end
 
-  it "should update" do
-    alice = PersonUpdate.find(@alice_uri, @context)
-    name = alice.name
-    alice.name = "a"
-    alice.save
-    alice.name = "b"
-    alice.name.should == "b"
-    alice.load
-    alice.name.should == "a"
+    it "can call load when it is not persised" do
+      alice = PersonUpdate.new(@alice_uri, @context)
+      alice.load
+      alice.name.should be_equal(@alice_name.to_s)
+      alice.known_to.first.uri.to_s.should be_equal(@bob_uri.to_s)
+      alice.known_to.first.name.to_s.should be_equal(@bob_name.to_s)
+    end
+
+    it "can call load when it is accessed its attribute" do
+      alice = PersonUpdate.new(@alice_uri, @context)
+      alice.name.should be_nil
+      alice.known_to.should be_empty
+      alice._persisted!
+      alice.name.should be_equal(@alice_name.to_s)
+      alice.known_to.first.uri.should be_equal(@bob_uri)
+    end
+
+    it "can call load when it is accessed its attribute" do
+      PersonUpdate.find(@alice_uri, @context).known_to.first.uri.to_s.should be_equal(@bob_uri.to_s);
+      PersonUpdate.find(@alice_uri, @context).known_to.first.name.should be_equal(@bob_name.to_s);
+      PersonUpdate.find(@alice_uri, @context).known_to.first.known_to.first.
+        name.should be_equal(@alice_name.to_s);
+    end
   end
 
   it "should return nil" do

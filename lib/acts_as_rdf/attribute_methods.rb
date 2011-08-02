@@ -38,6 +38,7 @@ module ActsAsRDF
             get_objects(method_name, property, type, opt)
           end
           self.send(:define_method, m_names[:get]) do
+            load if ! @loaded and ! @new_record
             unless @attr[method_name]
               _set_attr(method_name, opt[:single] == false ? [] : nil)
             end
@@ -72,6 +73,7 @@ module ActsAsRDF
             get_subjects(method_name, property, type, opt)
           end
           self.send(:define_method, m_names[:get]) do
+            load if ! @loaded and ! @new_record
             unless @attr[method_name]
               _set_attr(method_name, opt[:single] == false ? [] : nil)
             end

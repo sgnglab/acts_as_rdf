@@ -102,6 +102,7 @@ module ActsAsRDF
           @uri = uri
           @context = context
           @attr = {}
+          @loaded = false
           @new_record = true
         end
       end
@@ -117,9 +118,11 @@ module ActsAsRDF
       # 関連のデータを読み込む
       #
       def load
+        ResourceNotFound if id.empty?
         self.class.relations.each{|rel|
           self.send(self.class._relation_method_names(rel)[:load])
         }
+        @loaded = true
         _persisted!
         true
       end
