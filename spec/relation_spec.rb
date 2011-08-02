@@ -19,6 +19,7 @@ describe 'ActsAsRDF' do
       r << [@alice_uri, RDF::FOAF.knows, @bob_uri, @context]
       r << [@alice_uri, RDF.type, RDF::FOAF['Person'], @context]
       r << [@bob_uri, RDF.type, RDF::FOAF['Person'], @context]
+      r << [@bob_uri, RDF::FOAF.knows, @alice_uri, @context]
       r << [@alice_blog, RDF.type, RDF::FOAF['Document'], @context]
     }
   end
@@ -61,6 +62,10 @@ describe 'ActsAsRDF' do
         bob.should be_instance_of(PersonHOS)
         bob.uri.should be_equal(@bob_uri)
         bob.context.should be_equal(@context)
+      end
+
+      it "should return what is not new record" do
+        @alice.people.first.persisted?.should be_true
       end
     end
 

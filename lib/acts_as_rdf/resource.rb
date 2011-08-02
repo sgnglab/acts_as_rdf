@@ -163,7 +163,7 @@ module ActsAsRDF
         true
       end
 
-      private
+#      private
       # このデータが永続データであることを宣言する
       # 
       # @return [true]

@@ -6,13 +6,16 @@ module ActsAsRDF
       module InstanceMethods
         # @param [Object] value
         # @param [String, Spira::Type] type
+        # @param [Boolean] persisted 
         # @return [Object]
-        def build_value(value, type)
+        def build_value(value, type, persisted=false)
           case
           when type.respond_to?(:unserialize)
             type.unserialize(value)
           when type.is_a?(String)
-            eval "#{type}.new(value, context)"
+            t = eval " #{type}.new(value, context)"
+            t._persisted! if persisted
+            t
           else
             value
           end

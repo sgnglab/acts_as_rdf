@@ -127,7 +127,7 @@ module ActsAsRDF
         # @return [Object]
         def get_objects(method_name, property, type=nil, opt={:single=>false})
           obj = repository.query([uri, property, nil, context]).map{|s|
-            build_value(s.object, type)
+            build_value(s.object, type, true)
           }
           @attr[method_name] = opt[:single] ? obj.first : obj
         end
@@ -160,7 +160,7 @@ module ActsAsRDF
         # @return [Object]
         def get_subjects(method_name, property, type=nil, opt={:single=>false})
           subj = repository.query([nil, property, uri, context]).map{|s|
-            build_value(s.subject, type)
+            build_value(s.subject, type, true)
         }
           @attr[method_name] = opt[:single] ? subj.first : subj
         end
