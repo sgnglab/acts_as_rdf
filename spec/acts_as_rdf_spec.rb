@@ -87,6 +87,28 @@ describe 'ActsAsRDF' do
       lambda{ PersonFind.find(@alice_uri) }.should raise_error(ArgumentError)
     end
   end
+
+  context 'find' do
+    before do
+      class PersonFindByID
+        include ActsAsRDF::Resource
+        define_type RDF::FOAF['Person'] 
+      end
+      @alice_encode_uri = PersonFindByID.encode_uri(@alice_uri)
+    end
+
+    subject { PersonFindByID }
+
+    it "can call find method" do
+      subject.find_by_id(@alice_encode_uri, @context).should be_instance_of PersonFindByID
+      subject.find_by_id(PersonFindByID.encode_uri(RDF::FOAF.name), @context).should be_instance_of NilClass
+    end
+
+    it "cannot call find method" do
+      lambda{ subject.find }.should raise_error(ArgumentError)
+      lambda{ subject.find(@alice_encode_uri) }.should raise_error(ArgumentError)
+    end
+  end
   
   context 'create resource' do
     it 'should create resource' do

@@ -69,6 +69,16 @@ module ActsAsRDF
           found
         end
       end
+
+      # このクラスのインスタンスをレポジトリから検索する
+      # URIをエンコードしたIDをもとに検索を行う
+      #
+      # @param [String] id URIをエンコードした文字列
+      # @param [RDF::URI] context
+      # @param [self, nil]
+      def find_by_id(id, context)
+        self.find(self.decode_uri(id), context)
+      end
       
       # このクラスのインスタンスをレポジトリに登録する
       # URIはユニークなものが自動で与えられる
