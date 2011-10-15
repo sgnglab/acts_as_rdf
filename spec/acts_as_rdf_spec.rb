@@ -88,7 +88,7 @@ describe 'ActsAsRDF' do
     end
   end
 
-  context 'find' do
+  context 'find_by_id' do
     before do
       class PersonFindByID
         include ActsAsRDF::Resource
@@ -105,8 +105,8 @@ describe 'ActsAsRDF' do
     end
 
     it "cannot call find method" do
-      lambda{ subject.find }.should raise_error(ArgumentError)
-      lambda{ subject.find(@alice_encode_uri) }.should raise_error(ArgumentError)
+      lambda{ subject.find_by_id }.should raise_error(ArgumentError)
+      lambda{ subject.find_by_id(@alice_encode_uri) }.should raise_error(ArgumentError)
     end
   end
   
