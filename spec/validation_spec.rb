@@ -20,26 +20,23 @@ describe 'ActsAsRDF::ResourceにおけるValication' do
         define_type RDF::FOAF['Person']
         has_object :name, RDF::FOAF['names'], String
         validates_each :name do |record, attr, value|
-          record.errors.add attr, 'starts with a.' if value.to_s[0] == ?a
+          record.errors.add attr, 'starts with b.' if value.to_s[0] == ?b
         end
         init_attribute_methods
       end
-      @alice = PersonCallbacksValidation.find(@alice_uri, @context)
     end
 
-    it "should call valid?" do
-      @alice.valid?
-    end
+    subject { PersonCallbacksValidation.find(@alice_uri, @context) }
 
     it "should be valid" do
-      @alice.valid?.should be_true
-      @alice.invalid?.should be_false
+      subject.valid?.should be_true
+      subject.invalid?.should be_false
     end
 
     it "should be invalid" do
-      @alice.name = 'alice'
-      @alice.valid?.should be_false
-      @alice.invalid?.should be_true
+      subject.name = 'bad name'
+      subject.valid?.should be_false
+      subject.invalid?.should be_true
     end
   end
 end

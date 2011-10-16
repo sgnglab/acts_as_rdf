@@ -14,7 +14,7 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
   end
 
   describe ".included" do
-    before do
+    subject do
       class PersonCallbacks
         include ActsAsRDF::Resource
         attr_accessor :logger
@@ -24,16 +24,11 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
         
         init_attribute_methods
       end
-      @class = PersonCallbacks
+      PersonCallbacks
     end
-    it "includes the before_create callback" do
-      @class.should respond_to(:before_create)
-    end
-    it "includes the around_create callback" do
-      @class.should respond_to(:around_create)
-    end
-    it "includes the after_create callback" do
-      @class.should respond_to(:after_create)
+
+    [:before_create, :around_create, :after_create].each do |callbacks|
+      it { should respond_to(callbacks) }
     end
   end
 
@@ -53,39 +48,52 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
         end
         init_attribute_methods
       end
+      PersonCallbacksBeforeCreate
     end
-
-    context "create" do
-      it "should be called" do
-        @person = PersonCallbacksBeforeCreate.create(@context)
+    
+    context "it should be called" do
+      context "create" do
+        subject { PersonCallbacksBeforeCreate.create(@context) }
         
-        @person.logger.should == '+before_create'
-        @person.save.should == true
-        @person.persisted?.should == true
+        its(:logger) { should eq '+before_create' }
+        its(:persisted?) { should be_true }
+      end
+      
+      context "save" do
+        subject do
+          person = PersonCallbacksBeforeCreate.new(ActsAsRDF.uniq_uri,@context)
+          person.save
+          person
+        end
+        
+        its(:logger) { should eq '+before_create' }
+        its(:persisted?) { should be_true }
       end
     end
-
-    context "update" do
-      it "should not be called" do
-        @person = PersonCallbacksBeforeCreate.find(@alice_uri,@context)
-        @person.name = "new_name"
-        @person.save.should == true
-        @person.logger.should == nil
+    
+    context "it should not be called" do
+      context "change attributes" do
+        subject do
+          person = PersonCallbacksBeforeCreate.find(@alice_uri,@context)
+          person.name = "new_name"
+          person
+        end
+        
+        its(:logger) { should be_nil }
       end
-    end
-
-    context "save" do
-      it "should be called" do
-        @person = PersonCallbacksBeforeCreate.new(ActsAsRDF.uniq_uri,@context)
-        @person.name = "new_name"
-        @person.persisted?.should be_false
-        @person.save.should be_true
-        @person.logger.should == '+before_create'
-        @person.persisted?.should be_true
+      
+      context "new" do
+        subject do
+          person = PersonCallbacksBeforeCreate.new(ActsAsRDF.uniq_uri,@context)
+          person.name = "new_name"
+          person
+        end
+        
+        its(:logger) { should be_nil }
       end
     end
   end
-
+  
   describe ".before_save" do
     before do
       class PersonCallbacksBeforeSave
@@ -100,47 +108,51 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
           @logger = "" unless @logger
           @logger += '+before_save'
         end
-
+        
         init_attribute_methods
       end
     end
-
-    context "create" do
-      it "should be called" do
-        @person = PersonCallbacksBeforeSave.create(@context)
+    
+    context "it should be called" do
+      context "create" do
+        subject { PersonCallbacksBeforeSave.create(@context) }
         
-        @person.logger.should == '+before_save'
-        @person.save.should == true
-        @person.persisted?.should == true
+        its(:logger) { should == '+before_save' }
+        its(:persisted?) { should == true }
+      end
+      
+      context "save" do
+        subject do
+          person = PersonCallbacksBeforeSave.new(ActsAsRDF.uniq_uri,@context)
+          person.save
+          person
+        end
+        
+        its(:logger) { should eq '+before_save' }
+        its(:persisted?) { should be_true }
       end
     end
-
-    context "save" do
-      it "should be called" do
-        person = PersonCallbacksBeforeSave.new(ActsAsRDF.uniq_uri,@context)
-
-        person.save.should == true        
-        person.logger.should == '+before_save'
-        person.persisted?.should == true
-      end
-    end
-
-    context "update" do
-      it "should be called" do
-        alice = PersonCallbacksBeforeSave.find(@alice_uri,@context)
-
-        alice.save.should == true
-        alice.logger.should == '+before_save'
+    
+    context "it should not be called" do
+      context "change attributes" do
+        subject do
+          alice = PersonCallbacksBeforeSave.find(@alice_uri,@context)
+          alice.name = "new_name"
+          alice
+        end
+      
+        its(:logger) { should be_nil }
       end
     end
   end
-
+  
   describe ".before_update" do
     before do
       class PersonCallbacksBeforeUpdate
         include ActsAsRDF::Resource
         attr_accessor :logger
-        
+   
+        has_object :name, RDF::FOAF['names'], String     
         define_type RDF::FOAF['Person']
         
         before_update :action_before_update
@@ -148,38 +160,43 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
           @logger = "" unless @logger
           @logger += '+before_update'
         end
-
+        
         init_attribute_methods
       end
     end
 
-    context "create" do
-      it "should not be called" do
-        @person = PersonCallbacksBeforeUpdate.create(@context)
+    context "it should not be called" do
+      context "create" do
+        subject { PersonCallbacksBeforeUpdate.create(@context) }
         
-        @person.logger.should == nil
+        its(:logger) { should be_nil }
+      end
+
+      context "save" do
+        subject do
+          person = PersonCallbacksBeforeUpdate.new(ActsAsRDF.uniq_uri,@context)
+          person.save
+          person
+        end
+
+        its(:logger) { should be_nil }
       end
     end
 
-    context "save" do
-      it "should not be called" do
-        person = PersonCallbacksBeforeUpdate.new(ActsAsRDF.uniq_uri,@context)
+    context "it should be called" do
+      context "update" do
+        subject do
+          alice = PersonCallbacksBeforeUpdate.find(@alice_uri,@context)
+          alice.name = 'new_name'
+          alice.save
+          alice
+        end
         
-        person.save.should == true
-        person.logger.should == nil
-      end
-    end
-
-    context "update" do
-      it "should be called" do
-        alice = PersonCallbacksBeforeUpdate.find(@alice_uri,@context)
-
-        alice.save.should == true
-        alice.logger.should == '+before_update'
+        its(:logger) { should eq '+before_update' }
       end
     end
   end
-
+  
   describe ".before_initialize" do
     before do
       class PersonCallbacksBeforeInitialize
@@ -193,40 +210,44 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
           @logger = "" unless @logger
           @logger += '+before_initialize'
         end
-
+        
         init_attribute_methods
       end
     end
-
-    context "new" do
-      it "should be called" do
-        person = PersonCallbacksBeforeInitialize.new(ActsAsRDF.uniq_uri,@context)
-        
-        person.logger.should == '+before_initialize'
+    
+    context "it should be called" do
+      context "new" do
+        subject { PersonCallbacksBeforeInitialize.new(ActsAsRDF.uniq_uri,@context) }
+        its(:logger) { should == '+before_initialize' }
       end
-    end
 
-    context "create" do
-      it "should be called" do
-        person = PersonCallbacksBeforeInitialize.create(@context)
+      context "create" do
+        subject { PersonCallbacksBeforeInitialize.create(@context) }
         
-        person.logger.should == '+before_initialize'
-      end
-    end
-
-    context "save" do
-      it "should be called" do
-        person = PersonCallbacksBeforeInitialize.new(ActsAsRDF.uniq_uri,@context)
-        
-        person.save.should == true
-        person.logger.should == '+before_initialize'
+        its(:logger) { should == '+before_initialize' }
       end
     end
 
     context "update" do
-      it "should be called" do
-        alice = PersonCallbacksBeforeInitialize.find(@alice_uri,@context)
-        alice.logger.should == '+before_initialize'
+      subject do
+        person = PersonCallbacksBeforeInitialize.find(@alice_uri,@context)
+        person.save
+        person
+      end
+      
+      its(:logger) { should == '+before_initialize' }
+    end
+
+    context "it should not be called" do    
+      context "save" do
+        subject do
+          person = PersonCallbacksBeforeInitialize.new(ActsAsRDF.uniq_uri,@context)
+          person.logger = nil
+          person.save
+          person
+        end
+        
+        its(:logger) { should be_nil }
       end
     end
   end

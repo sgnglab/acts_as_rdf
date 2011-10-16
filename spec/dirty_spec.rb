@@ -28,27 +28,30 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
       r << [@alice_uri, RDF.type, RDF::FOAF['Person'], @context]
       r << [@alice_blog, RDF.type, RDF::FOAF['Document'], @context]
     }
-    @alice = PersonDirty.find(@alice_uri, @context)
   end
 
   describe "#attribute_change" do
+    subject { PersonDirty.find(@alice_uri, @context) }
+
     context "when attribute changed" do
       it "should return true" do
-        @alice.names = ["bob"]
-        @alice.names_changed?.should be_true
-        @alice.changed?.should be_true
-
-        @alice.homepage = @alice_uri
-        @alice.homepage_changed?.should be_true
-        @alice.changed?.should be_true
+        subject.names = ["bob"]
+        subject.names_changed?.should be_true
+        subject.changed?.should be_true
+      end
+      
+      it "should return true" do
+        subject.homepage = @alice_uri
+        subject.homepage_changed?.should be_true
+        subject.changed?.should be_true
       end
     end
 
     context "when attribute not changed" do
       it "should return false" do
-        @alice.changed?.should be_false
-        @alice.names_changed?.should be_false
-        @alice.homepage_changed?.should be_false
+        subject.changed?.should be_false
+        subject.names_changed?.should be_false
+        subject.homepage_changed?.should be_false
       end
     end
   end

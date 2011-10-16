@@ -23,13 +23,31 @@ describe 'ActsAsRDF' do
     end
   end
 
-  it "should be return serialized uri" do
-    alice = PersonA.find(@alice_uri, @context)
-    alice.id.should == PersonA.encode_uri(@alice_uri)
-    alice.id.should == alice.encode_uri
+  describe "#id" do
+    context "it saved" do
+      before do
+        @alice = PersonA.find(@alice_uri, @context)
+      end
+      subject { @alice.id }
+      
+      it { should_not be_empty }
+      it { should eq PersonA.encode_uri(@alice_uri) }
+      it { should eq @alice.encode_uri }
+    end
+
+    context "it didn't save" do
+      before do
+        @alice = PersonA.new(@alice_uri, @context)
+      end
+      subject { @alice.id }
+
+      it { should_not be_empty }
+      it { should eq PersonA.encode_uri(@alice_uri) }
+      it { should eq @alice.encode_uri }
+    end
   end
 
-  context 'setting repository' do
+  describe '.repository' do
     it "should has repository" do
       rep = ActsAsRDF.repository
       rep.should be_instance_of RDF::Repository
@@ -39,52 +57,61 @@ describe 'ActsAsRDF' do
       rep.should == ActsAsRDF.repository
     end
     
-    it "should has kind of repository" do
+    it "should have kind of repository" do
       class MyRepository < RDF::Repository; end
       ActsAsRDF.repository = MyRepository.new
     end
+
+    it "should not have kind of non-repository" do
+      class NotRepository ; end
+      expect { ActsAsRDF.repository = NotRepository.new }.to raise_error
+    end
   end
 
-  context 'set type' do
-    context "if it didn't define type"do
-      it "raises error" do
+  describe '#type' do
+    context "if it didn't define the type"do
+      subject do
         class NoType
           include ActsAsRDF::Resource
         end
-        lambda{ NoType.type }.should raise_error(ActsAsRDF::NoTypeError)
+      end
+
+      it "raises error" do
+        expect { subject.type }.to raise_error(ActsAsRDF::NoTypeError)
       end
     end
+    
+    context "if it defined the type"do
+      before do
+        class Person3
+          include ActsAsRDF::Resource
+          define_type RDF::FOAF['Person3']
+        end
+      end
 
-    it "can set type" do
-#      Person.find(@alice_uri, @context).type.should be_instance_of RDF::URI
-      class Person3
-        include ActsAsRDF::Resource
-        define_type RDF::FOAF['Person3']
+      it "get type" do
+        Person3.type.should == RDF::FOAF['Person3']
       end
-      class Person2
-        include ActsAsRDF::Resource
-        define_type RDF::FOAF['Person2']
-      end
-      Person3.type.should == RDF::FOAF['Person3']
     end
   end
 
-  context 'find' do
-    before do
+  describe '#find' do
+    subject do
       class PersonFind
         include ActsAsRDF::Resource
         define_type RDF::FOAF['Person'] 
       end
+      PersonFind
     end
     
     it "can call find method" do
-      PersonFind.find(@alice_uri, @context).should be_instance_of PersonFind
-      PersonFind.find(RDF::FOAF.name, @context).should be_instance_of NilClass
+      subject.find(@alice_uri, @context).should be_instance_of subject
+      subject.find(RDF::FOAF.name, @context).should be_instance_of NilClass
     end
     
     it "cannot call find method" do
-      lambda{ PersonFind.find }.should raise_error(ArgumentError)
-      lambda{ PersonFind.find(@alice_uri) }.should raise_error(ArgumentError)
+      lambda{ subject.find }.should raise_error(ArgumentError)
+      lambda{ subject.find(@alice_uri) }.should raise_error(ArgumentError)
     end
   end
 
@@ -110,7 +137,7 @@ describe 'ActsAsRDF' do
     end
   end
   
-  context 'create resource' do
+  describe '.create' do
     it 'should create resource' do
       person = PersonA.create(@context)
       person.should be_instance_of PersonA
@@ -122,16 +149,17 @@ describe 'ActsAsRDF' do
     end
   end
 
-  context '#persisted' do
+  describe '#persisted' do
     it { PersonA.create(@context).persisted?.should be_true }
     it { PersonA.new(@context,@context).persisted?.should be_false }
     it { PersonA.find(@alice_uri,@context).persisted?.should be_true }
   end
 
-  context 'generate uniq_uri' do
+  describe '#uniq_uri' do
     it "should return RDF:URI" do
       ActsAsRDF.uniq_uri.should be_instance_of(RDF::URI)
     end
+
     it "should return new uniq uri if uri confricted" do
       module ActsAsRDF
         @@rand_place = 1

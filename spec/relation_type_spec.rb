@@ -18,7 +18,7 @@ describe 'ActsAsRDF' do
   before(:each) do
     @alice_uri = RDF::URI.new('http://ali.ce')
     @alice_name = RDF::Literal.new('Alice')
-    @alice_blog = RDF::URI.new('htt://alice.blog.com')
+    @alice_age = RDF::Literal.new('20', :datatype => RDF::XSD.integer)
     
     @bob_uri = RDF::URI.new('http://bob.com')
 
@@ -28,39 +28,47 @@ describe 'ActsAsRDF' do
       r << [@alice_uri, RDF::FOAF.name, 'wrong_name']
       r << [@alice_uri, RDF::FOAF.name, @alice_name, @context]
       r << [@alice_uri, RDF::FOAF.homepage, @alice_blog, @context]
-      r << [@alice_uri, RDF::FOAF.knows, @bob_uri, @context]
+      r << [@alice_uri, RDF::FOAF.age, @alice_age, @context]
       r << [@alice_uri, RDF.type, RDF::FOAF['Person'], @context]
       r << [@bob_uri, RDF.type, RDF::FOAF['Person'], @context]
-      r << [@alice_blog, RDF.type, RDF::FOAF['Document'], @context]
     }
   end
 
   context 'with relation type' do
-    before do
-      @alice = PersonT.find(@alice_uri, @context)
+    before { @alice = PersonT.find(@alice_uri, @context) }
+
+    describe Spira::Types::String do
+      subject { @alice.name }
+
+      it { should be_instance_of(String) }
+      it { should == @alice_name.to_s }
+        
+      context "update" do
+        subject do
+          @alice.name = "AAA"
+          @alice.name
+        end
+
+        it { should be_instance_of(String) }
+        it { should == "AAA" }
+      end
     end
 
-    it 'should return string' do
-      @alice.name.should be_instance_of(String)
-      @alice.name.should == @alice_name.to_s
-    end
+    describe Spira::Types::Integer do
+      subject { @alice.age }
 
-    it 'should update' do
-      new_name = 'AAALLIICCE'
-      @alice.name = new_name
-      @alice.name.should be_instance_of(String)
-      @alice.name.should == new_name
-    end
+      it { should be_instance_of(Fixnum) }
+      it { should == @alice_age.to_s.to_i }
 
-    it 'should update' do
-      new_name = 'AAALLIICCE'
-      @alice.name = new_name
-      @alice.name.should be_instance_of(String)
-      @alice.name.should == new_name
+      context "update" do
+        subject do
+          @alice.age = 40
+          @alice.age
+        end
 
-#      @alice.age = 20
-#      @alice.age.should be_instance_of(Integer)
-#      @alice.age.should == 20
+        it { should be_instance_of(Fixnum) }
+        it { should == 40 }
+      end
     end
   end
 end
