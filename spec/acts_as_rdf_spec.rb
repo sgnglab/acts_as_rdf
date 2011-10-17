@@ -47,6 +47,23 @@ describe 'ActsAsRDF' do
     end
   end
 
+  describe "#new" do
+    before do
+      class PersonNew
+        include ActsAsRDF::Resource
+        define_type RDF::FOAF['Person']
+        
+        init_attribute_methods
+      end
+    end
+
+    context "Argument => ()" do
+      subject { Person.new() }
+
+      its(:id) { should be_nil }
+    end
+  end
+
   describe '.repository' do
     it "should has repository" do
       rep = ActsAsRDF.repository
