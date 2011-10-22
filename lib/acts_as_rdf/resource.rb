@@ -79,6 +79,18 @@ module ActsAsRDF
       def find_by_id(id, context)
         self.find(self.decode_uri(id), context)
       end
+
+      # このクラスのインスタンスをすべて返す
+      #
+      # @param [RDF::URI] context
+      # @return [Array<Object>]
+      def all(context=nil)
+        ActsAsRDF.repository.query([nil, RDF.type, type, context]).map do |x| 
+          found = self.new(x.subject, context)
+          found.load
+          found
+        end
+      end
       
       # このクラスのインスタンスをレポジトリに登録する
       # URIはユニークなものが自動で与えられる

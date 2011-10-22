@@ -66,4 +66,30 @@ describe 'ActsAsRDF' do
     end
   end
 
+  describe '.all' do
+    context 'resouces exsist in the context' do
+      subject { PersonFind.all(@context) }
+      
+      it "returns alice and bob" do
+        [@alice_uri, @bob_uri].each{ |uri|
+          subject.map{|x| x.uri.to_s }.should include uri.to_s
+        }
+      end
+      it "returns two resouces" do
+        subject.should have(2).items
+      end
+    end
+    context 'resouces do not exsist in the context' do
+      subject { PersonFind.all(RDF::URI("http://no.exists/")) }
+      
+      it "returns alice and bob" do
+        [@alice_uri, @bob_uri].each{ |uri|
+          subject.map{|x| x.uri.to_s }.should_not include uri.to_s
+        }
+      end
+      it "returns two resouces" do
+        subject.should be_empty
+      end
+    end
+  end
 end
