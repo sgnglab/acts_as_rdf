@@ -197,6 +197,17 @@ module ActsAsRDF
         true
       end
 
+      # 各属性値を更新し、このオブジェクトの値をレポジトリ側にも反映する
+      # 
+      # @param [Hash{Symbol => Object}] attributes
+      # @return [Boolean] true, false
+      def update_attributes(attributes)
+        attributes.each{ |k,v|
+          send("#{k}=", v)
+        }
+        save
+      end
+
 #      private
       # このデータが永続データであることを宣言する
       # 

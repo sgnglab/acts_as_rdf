@@ -121,4 +121,25 @@ describe 'ActsAsRDF' do
     bob_.should be_instance_of(PersonUpdate)
     bob_.name.should == 'bob'
   end
+
+  describe "#update_attributes" do
+    before do
+      class PersonUpdateAttributes
+        include ActsAsRDF::Resource
+        define_type RDF::FOAF['Person']
+        
+        has_object :name, RDF::FOAF[:name], String
+        has_subjects :knows, RDF::FOAF[:knows]
+        
+        init_attribute_methods
+      end
+    end
+    it "should update attributes" do
+      person = PersonUpdateAttributes.new(@alice_uri, @context)
+      person.save
+      person.update_attributes(:name => "Alice").should be_true
+      get = PersonUpdateAttributes.find(@alice_uri, @context)
+      get.name.should eq "Alice"
+    end
+  end
 end
