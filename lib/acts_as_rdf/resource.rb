@@ -96,6 +96,16 @@ module ActsAsRDF
         end
         new
       end
+
+      # このクラスのオブジェクトをレポジトリから削除する
+      # ただし、deleteではこのオブジェクトのrdf:typeに結びつけられた
+      # トリプルを削除するだけなので、これ以外のトリプルは削除されない
+      # 
+      # @param [RDF::URI] uri
+      # @param [RDF::URI] context
+      def delete(uri, context=nil)
+        ActsAsRDF.repository.delete([uri, RDF.type, self.type, context])
+      end
     end
     
     module InstanceMethods

@@ -244,4 +244,20 @@ describe 'ActsAsRDF' do
       ActsAsRDF.uniq_uri.should_not == uri1
     end
   end
+
+  describe '.delete' do
+    before do
+      class PersonDeleteClass
+        include ActsAsRDF::Resource
+        define_type RDF::FOAF['Person']
+        
+        init_attribute_methods
+      end
+    end
+
+    it "should delete object" do
+      PersonDeleteClass.delete(@alice_uri, @context)
+      PersonDeleteClass.find(@alice_uri, @context).should be_nil
+    end
+  end
 end
