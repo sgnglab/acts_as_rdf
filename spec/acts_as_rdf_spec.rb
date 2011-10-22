@@ -177,8 +177,10 @@ describe 'ActsAsRDF' do
       res = PersonA.find(person.uri, @context)
       res.should be_true
     end
-    it 'should not create resource' do
-      lambda{ PersonA.create }.should raise_error(ArgumentError)
+    it 'should create resource' do
+      person = PersonA.create
+      person.uri.should be_instance_of RDF::URI
+      person.context.should be_nil
     end
   end
 

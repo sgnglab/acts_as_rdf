@@ -41,11 +41,11 @@ describe 'ActsAsRDF' do
     it "can call find method" do
       subject.find(@alice_uri, @context).should be_instance_of subject
       subject.find(RDF::FOAF.name, @context).should be_nil
+      subject.find(@alice_uri)
     end
     
     it "cannot call find method" do
       expect{ subject.find }.to raise_error(ArgumentError)
-      expect{ subject.find(@alice_uri) }.to raise_error(ArgumentError)
     end
   end
 
@@ -58,11 +58,11 @@ describe 'ActsAsRDF' do
     it "can call find method" do
       subject.find_by_id(@alice_encode_uri, @context).should be_instance_of subject
       subject.find_by_id(subject.encode_uri(RDF::FOAF.name), @context).should be_nil
+      subject.find_by_id(@alice_encode_uri) # not raise error
     end
 
     it "cannot call find method" do
       expect{ subject.find_by_id }.to raise_error(ArgumentError)
-      expect{ subject.find_by_id(@alice_encode_uri) }.to raise_error(ArgumentError)
     end
   end
 

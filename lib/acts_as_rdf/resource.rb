@@ -59,7 +59,7 @@ module ActsAsRDF
       # @param [RDF::URI] uri
       # @param [RDF::URI] context
       # @param [self, nil]
-      def find(uri, context)
+      def find(uri, context=nil)
         res = ActsAsRDF.repository.query([uri, RDF.type, type, context]).map do |x| end
         if res.empty?
           nil
@@ -76,7 +76,7 @@ module ActsAsRDF
       # @param [String] id URIをエンコードした文字列
       # @param [RDF::URI] context
       # @param [self, nil]
-      def find_by_id(id, context)
+      def find_by_id(id, context=nil)
         self.find(self.decode_uri(id), context)
       end
 
@@ -97,7 +97,7 @@ module ActsAsRDF
       #
       # @param [RDF::URI] context
       # @param [self]
-      def create(context)
+      def create(context=nil)
         uri = ActsAsRDF.uniq_uri
         new = self.new(uri,context)
         new.run_callbacks(:save) do
