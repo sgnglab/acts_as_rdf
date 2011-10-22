@@ -136,6 +136,7 @@ module ActsAsRDF
           @attr = {}
           @loaded = false
           @new_record = true
+          @destroyed = false
 
           if arg1.kind_of?(Hash)
             arg1.each{ |k, v|
@@ -179,6 +180,11 @@ module ActsAsRDF
         end
       end
 
+      def delete
+        self.class.delete(@uri, @context) if persisted?
+        @destroyed = true
+      end
+
       #
       # @return [RDF::Repository]
       def repository
@@ -190,7 +196,7 @@ module ActsAsRDF
       # @return [true]
       # @see http://api.rubyonrails.org/classes/ActiveModel/Conversion.html
       def persisted?
-        ! @new_record
+        ! (@new_record || @destroyed)
       end
 
       # 関連のデータを実際に保存する

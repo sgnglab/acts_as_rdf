@@ -260,4 +260,70 @@ describe 'ActsAsRDF' do
       PersonDeleteClass.find(@alice_uri, @context).should be_nil
     end
   end
+
+  describe '#delete' do
+    before do
+      class PersonDeleteInstance
+        include ActsAsRDF::Resource
+        define_type RDF::FOAF['Person']
+        
+        init_attribute_methods
+      end
+    end
+
+    context "resouce is in the repository" do
+      subject {
+        alice = PersonDeleteClass.find(@alice_uri, @context)
+        alice.delete
+        alice
+      }
+
+      its(:persisted?) {should be_false }
+
+      it "cannnot be found" do
+        PersonDeleteClass.find(subject.uri, @context).should be_nil
+      end
+    end
+
+    context "resouce is in the repository with another context" do
+      before do
+        another_context = RDF::URI('http://ano.ther/')
+        @another_alice = PersonDeleteClass.new(@alice_uri, another_context)
+        @another_alice.save
+        @alice = PersonDeleteClass.find(@alice_uri, @context)
+        @alice.delete
+      end
+      subject { @alice }
+
+      its(:persisted?) {should be_false }
+
+      it "cannnot be found" do
+        PersonDeleteClass.find( subject.uri, subject.context).should be_nil
+      end
+
+      context "resouce is in the another context" do
+        subject { @another_alice }
+        
+        its(:persisted?) { should be_true }
+        
+        it "can be found" do
+          PersonDeleteClass.find(subject.uri, subject.context).should be_true
+        end
+      end
+    end
+
+    context "resouce is not in the repository" do
+      subject do
+        bob = PersonDeleteClass.new(RDF::URI.new('http://bo.b/'), @context)
+        bob.delete
+        bob
+      end
+
+      its(:persisted?) { should be_false }
+      
+      it "cannot be found" do
+        PersonDeleteClass.find(subject.uri, subject.context).should be_nil
+      end
+    end
+  end
 end
