@@ -27,7 +27,9 @@ describe 'ActsAsRDF::ResourceにおけるDirty' do
       PersonCallbacks
     end
 
-    [:before_create, :around_create, :after_create].each do |callbacks|
+    [:before_create,  :around_create,  :after_create,
+     :before_destroy, :around_destroy, :after_destroy
+    ].each do |callbacks|
       it { should respond_to(callbacks) }
     end
   end

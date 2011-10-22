@@ -197,6 +197,16 @@ module ActsAsRDF
         @destroyed = true
       end
 
+      # このオブジェクトを削除する
+      # 現状ではdeleteとの違いはあまりない。
+      # ただし、destoryの場合は:destoryのコールバックが発生する点が異なる
+      # 
+      def destroy
+        run_callbacks(:destroy) do
+          delete
+        end
+      end
+
       #
       # @return [RDF::Repository]
       def repository
