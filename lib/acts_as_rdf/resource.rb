@@ -99,21 +99,42 @@ module ActsAsRDF
     end
     
     module InstanceMethods
-      # RDFのリソースであるクラスを生成する
-      #      project = RDF::URI.new('http://project.com/')
-      #      ActsAsRDF.new(RDF::URI.new('http://project.com/one_page'), project.context)
+      # インスタンスを生成する
+      #      project_one = RDF::URI.new('http://project.com/one')
+      #      context = RDF::URI.new('http://project.com/)
+      #      # URIとコンテキストだけを指定
+      #      pro = Project.new(project_one, context)
+      #      pro.name = "MyProject"
+      #      # まとめて指定
+      #      Project.new({:uri => project_one, :context => context, :name => 'MyProject'})
       #
-      # @param [RDF::URI] uri
-      # @param [RDF::URI] context (メタデータシステムの場合、通常は Project#context の値)
-      # @return [self]
-      def initialize(uri, context)
+      # @overload initialize(uri = nil, context = nil)
+      #   @param [RDF::URI] uri
+      #   @param [RDF::URI] context (メタデータシステムの場合、通常は Project#context の値)
+      #   @return [self]
+      #
+      # @overload initialize(attributes = {})
+      #   @param [Hash{Symbol => Object}] attributes
+      #   @param [Hash{Symbol => Object}] attributes
+      #   @option attributes [RDF::URI] :uri
+      #     :defaults nil
+      #   @option attributes [RDF::URI] :context
+      #     :defaults nil
+      #   @return [self]
+      def initialize(arg1=nil, arg2=nil)
         run_callbacks(:initialize) do
-          raise unless uri && context
-          @uri = uri
-          @context = context
           @attr = {}
           @loaded = false
           @new_record = true
+
+          if arg1.kind_of?(Hash)
+            arg1.each{ |k, v|
+              self.send("#{k}=", v)
+            }
+          elsif arg1.kind_of?(RDF::URI)
+            @uri = arg1
+            @context = arg2
+          end
         end
       end
 
@@ -122,7 +143,7 @@ module ActsAsRDF
       #
       # @return [String]
       def id
-        encode_uri
+        encode_uri if @uri
       end
 
       # 関連のデータを読み込む

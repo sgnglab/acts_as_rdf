@@ -52,15 +52,73 @@ describe 'ActsAsRDF' do
       class PersonNew
         include ActsAsRDF::Resource
         define_type RDF::FOAF['Person']
+
+        has_object :name, RDF::FOAF[:name], String
         
         init_attribute_methods
       end
     end
 
     context "Argument => ()" do
-      subject { Person.new() }
+      subject { PersonNew.new() }
 
       its(:id) { should be_nil }
+      its(:uri) { should be_nil }
+      its(:context) { should be_nil }
+      its(:name) { should be_nil }
+    end
+
+    context "Argument => (URI)" do
+      subject { PersonNew.new(@alice_uri) }
+
+      its(:id) { should eq Person.encode_uri(@alice_uri) }
+      its(:uri) { should be(@alice_uri) }
+      its(:context) { should be_nil }
+      its(:name) { should be_nil }
+    end
+
+    context "Argument => (URI, URI)" do
+      subject { PersonNew.new(@alice_uri, @context) }
+
+      its(:id) { should eq PersonNew.encode_uri(@alice_uri) }
+      its(:uri) { should be(@alice_uri) }
+      its(:context) { should be(@context) }
+      its(:name) { should be_nil }
+    end
+
+    context "Argument => (Hash{})" do
+      subject { PersonNew.new({}) }
+
+      its(:id) { should be_nil }
+      its(:uri) { should be_nil }
+      its(:context) { should be_nil }
+      its(:name) { should be_nil }
+    end
+
+    context "Argument => (Hash{uri, context})" do
+      subject { PersonNew.new({:uri => @alice_uri, :context => @context}) }
+
+      its(:id) { should eq PersonNew.encode_uri(@alice_uri) }
+      its(:uri) { should be(@alice_uri) }
+      its(:context) { should be(@context) }
+      its(:name) { should be_nil }
+    end
+
+    context "Argument => (Hash{uri, name})" do
+      subject { PersonNew.new({:uri => @alice_uri, :name => "alice"}) }
+
+      its(:id) { should eq PersonNew.encode_uri(@alice_uri) }
+      its(:uri) { should be(@alice_uri) }
+      its(:context) { should be_nil }
+      its(:name) { should eq "alice" }
+    end
+
+    context "Argument => (Hash{uri, invalid_name})" do
+      it "should raise Error" do
+        expect{
+          PersonNew.new(:uri => @alice_uri, :invalid_name => "ii")
+        }.to raise_error(NoMethodError)
+      end
     end
   end
 
