@@ -214,8 +214,8 @@ module ActsAsRDF
       # 関連のデータを実際に保存する
       #
       def _save
-        uri = @uri || ActsAsRDF.uniq_uri
-        repository.insert([uri, RDF.type, self.class.type, context])
+        @uri ||= ActsAsRDF.uniq_uri
+        repository.insert([@uri, RDF.type, self.class.type, @context])
             
         self.class.relations.each{|rel|
           self.send(self.class._relation_method_names(rel)[:save])

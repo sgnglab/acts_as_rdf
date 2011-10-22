@@ -102,24 +102,40 @@ describe 'ActsAsRDF' do
     bob.should === nil
   end
 
-  it "should save resource" do
-    bob_uri = RDF::URI.new('http://bob.com')
-    bob = PersonUpdate.new(bob_uri, @context)
-    bob.save
-    bob_ = PersonUpdate.find(bob_uri, @context)
-    bob_.should be_instance_of(PersonUpdate)
-    bob_.uri.should === bob_uri
-    bob_.context.should == @context
-  end
+  describe '#save' do
+    before do
+      @bob_uri = RDF::URI.new('http://bob.com')
+    end
 
-  it "should save resource" do
-    bob_uri = RDF::URI.new('http://bob.com')
-    bob = PersonUpdate.new(bob_uri, @context)
-    bob.name = 'bob'
-    bob.save
-    bob_ = PersonUpdate.find(bob_uri, @context)
-    bob_.should be_instance_of(PersonUpdate)
-    bob_.name.should == 'bob'
+    context 'if you specify a uri' do
+      it "should save resource" do
+        bob = PersonUpdate.new(@bob_uri, @context)
+        bob.save
+        bob_ = PersonUpdate.find(@bob_uri, @context)
+        bob_.should be_instance_of PersonUpdate
+        bob_.uri.should === @bob_uri
+        bob_.context.should == @context
+      end
+      
+      it "should save resource" do
+        bob = PersonUpdate.new(@bob_uri, @context)
+        bob.name = 'bob'
+        bob.save
+        bob_ = PersonUpdate.find(@bob_uri, @context)
+        bob_.should be_instance_of PersonUpdate
+        bob.context.should be_equal @context
+        bob_.name.should == 'bob'
+      end
+    end
+
+    context 'if you do not specify a uri' do
+      it "is set uniq uri" do
+        bob = PersonUpdate.new
+        bob.save
+        bob.uri.should be_instance_of RDF::URI
+        bob.context.should be_nil
+      end
+    end
   end
 
   describe "#update_attributes" do
