@@ -35,7 +35,7 @@ describe 'ActsAsRDF' do
   end
 
 
-  describe '#find' do
+  describe '.find' do
     subject { PersonFind }
     
     it "can call find method" do
@@ -47,9 +47,17 @@ describe 'ActsAsRDF' do
     it "cannot call find method" do
       expect{ subject.find }.to raise_error(ArgumentError)
     end
+
+    context "it does not have result" do
+      it "should return nil" do
+        bob_uri = RDF::URI.new('http://bob.com')
+        bob = subject.find(bob_uri, @context)
+        bob.should === nil
+      end
+    end
   end
 
-  context 'find_by_id' do
+  context '.find_by_id' do
     before do
       @alice_encode_uri = PersonFind.encode_uri(@alice_uri)
     end
