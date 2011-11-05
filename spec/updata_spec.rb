@@ -34,13 +34,6 @@ describe 'ActsAsRDF' do
     }
   end
   
-  it "should be return cache" do
-    alice = PersonUpdate.find(@alice_uri, @context)
-    name = alice.name
-    ActsAsRDF.repository = RDF::Repository.new
-    alice.name.should == name
-  end
-
   it "should return nil" do
     bob_uri = RDF::URI.new('http://bob.com')
     bob = PersonUpdate.find(bob_uri, @context)

@@ -141,6 +141,13 @@ describe 'ActsAsRDF' do
       class NotRepository ; end
       expect { ActsAsRDF.repository = NotRepository.new }.to raise_error
     end
+
+    it "cant change repository" do
+      alice = PersonA.find(@alice_uri, @context)
+      ActsAsRDF.repository = RDF::Repository.new
+      alice.uri.should == @alice_uri
+      alice.context.should == @context
+    end
   end
 
   describe '#type' do
