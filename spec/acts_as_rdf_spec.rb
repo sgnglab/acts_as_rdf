@@ -169,26 +169,6 @@ describe 'ActsAsRDF' do
       end
     end
   end
-  
-  describe '.create' do
-    it 'should create resource' do
-      person = PersonA.create(@context)
-      person.should be_instance_of PersonA
-      res = PersonA.find(person.uri, @context)
-      res.should be_true
-    end
-    it 'should create resource' do
-      person = PersonA.create
-      person.uri.should be_instance_of RDF::URI
-      person.context.should be_nil
-    end
-  end
-
-  describe '#persisted' do
-    it { PersonA.create(@context).persisted?.should be_true }
-    it { PersonA.new(@context,@context).persisted?.should be_false }
-    it { PersonA.find(@alice_uri,@context).persisted?.should be_true }
-  end
 
   describe '#uniq_uri' do
     it "should return RDF:URI" do
@@ -202,88 +182,6 @@ describe 'ActsAsRDF' do
       uri1 = ActsAsRDF.uniq_uri
       ActsAsRDF.repository.insert([uri1, RDF.type, RDF::FOAF['Document']])
       ActsAsRDF.uniq_uri.should_not == uri1
-    end
-  end
-
-  describe '.delete' do
-    before do
-      class PersonDeleteClass
-        include ActsAsRDF::Resource
-        define_type RDF::FOAF['Person']
-        
-        init_attribute_methods
-      end
-    end
-
-    it "should delete object" do
-      PersonDeleteClass.delete(@alice_uri, @context)
-      PersonDeleteClass.find(@alice_uri, @context).should be_nil
-    end
-  end
-
-  describe '#delete' do
-    before do
-      class PersonDeleteInstance
-        include ActsAsRDF::Resource
-        define_type RDF::FOAF['Person']
-        
-        init_attribute_methods
-      end
-    end
-
-    context "resouce is in the repository" do
-      subject {
-        alice = PersonDeleteClass.find(@alice_uri, @context)
-        alice.delete
-        alice
-      }
-
-      its(:persisted?) {should be_false }
-
-      it "cannnot be found" do
-        PersonDeleteClass.find(subject.uri, @context).should be_nil
-      end
-    end
-
-    context "resouce is in the repository with another context" do
-      before do
-        another_context = RDF::URI('http://ano.ther/')
-        @another_alice = PersonDeleteClass.new(@alice_uri, another_context)
-        @another_alice.save
-        @alice = PersonDeleteClass.find(@alice_uri, @context)
-        @alice.delete
-      end
-      subject { @alice }
-
-      its(:persisted?) {should be_false }
-
-      it "cannnot be found" do
-        PersonDeleteClass.find( subject.uri, subject.context).should be_nil
-      end
-
-      context "resouce is in the another context" do
-        subject { @another_alice }
-        
-        its(:persisted?) { should be_true }
-        
-        it "can be found" do
-          PersonDeleteClass.find(subject.uri, subject.context).should be_true
-        end
-      end
-    end
-
-    context "resouce is not in the repository" do
-      subject do
-        bob = PersonDeleteClass.new(RDF::URI.new('http://bo.b/'), @context)
-        bob.delete
-        bob
-      end
-
-      its(:persisted?) { should be_false }
-      
-      it "cannot be found" do
-        PersonDeleteClass.find(subject.uri, subject.context).should be_nil
-      end
     end
   end
 end

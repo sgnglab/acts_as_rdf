@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-
-# -*- coding: utf-8 -*-
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
 # 値の更新機能のテスト
@@ -35,13 +33,6 @@ describe 'ActsAsRDF' do
       r << [@alice_uri, RDF::FOAF.knows, @bob_uri, @context]
     }
   end
-
-  it "should not change persisted?" do
-    bob = PersonUpdate.new(ActsAsRDF.uniq_uri, @context)
-    bob.persisted?.should be_false
-    bob.name = 'bob'
-    bob.persisted?.should be_false
-  end
   
   it "should be return cache" do
     alice = PersonUpdate.find(@alice_uri, @context)
@@ -50,112 +41,9 @@ describe 'ActsAsRDF' do
     alice.name.should == name
   end
 
-  context "load" do
-    it "should not return cache if reloaded" do
-      alice = PersonUpdate.find(@alice_uri, @context)
-      name = alice.name
-      alice.name = "a"
-      alice.name.should == "a"
-      alice.load
-      alice.name.should == name
-    end
-    
-    it "should update" do
-      alice = PersonUpdate.find(@alice_uri, @context)
-      name = alice.name
-      alice.name = "a"
-      alice.save
-      alice.name = "b"
-      alice.name.should == "b"
-      alice.load
-      alice.name.should == "a"
-    end
-
-    it "can call load when it is not persised" do
-      alice = PersonUpdate.new(@alice_uri, @context)
-      alice.load
-      alice.name.should be_equal(@alice_name.to_s)
-      alice.known_to.first.uri.to_s.should be_equal(@bob_uri.to_s)
-      alice.known_to.first.name.to_s.should be_equal(@bob_name.to_s)
-    end
-
-    it "can call load when it is accessed its attribute" do
-      alice = PersonUpdate.new(@alice_uri, @context)
-      alice.name.should be_nil
-      alice.known_to.should be_empty
-      alice._persisted!
-      alice.name.should be_equal(@alice_name.to_s)
-      alice.known_to.first.uri.should be_equal(@bob_uri)
-    end
-
-    it "can call load when it is accessed its attribute" do
-      PersonUpdate.find(@alice_uri, @context).known_to.first.uri.to_s.should be_equal(@bob_uri.to_s);
-      PersonUpdate.find(@alice_uri, @context).known_to.first.name.should be_equal(@bob_name.to_s);
-      PersonUpdate.find(@alice_uri, @context).known_to.first.known_to.first.
-        name.should be_equal(@alice_name.to_s);
-    end
-  end
-
   it "should return nil" do
     bob_uri = RDF::URI.new('http://bob.com')
     bob = PersonUpdate.find(bob_uri, @context)
     bob.should === nil
-  end
-
-  describe '#save' do
-    before do
-      @bob_uri = RDF::URI.new('http://bob.com')
-    end
-
-    context 'if you specify a uri' do
-      it "should save resource" do
-        bob = PersonUpdate.new(@bob_uri, @context)
-        bob.save
-        bob_ = PersonUpdate.find(@bob_uri, @context)
-        bob_.should be_instance_of PersonUpdate
-        bob_.uri.should === @bob_uri
-        bob_.context.should == @context
-      end
-      
-      it "should save resource" do
-        bob = PersonUpdate.new(@bob_uri, @context)
-        bob.name = 'bob'
-        bob.save
-        bob_ = PersonUpdate.find(@bob_uri, @context)
-        bob_.should be_instance_of PersonUpdate
-        bob.context.should be_equal @context
-        bob_.name.should == 'bob'
-      end
-    end
-
-    context 'if you do not specify a uri' do
-      it "is set uniq uri" do
-        bob = PersonUpdate.new
-        bob.save
-        bob.uri.should be_instance_of RDF::URI
-        bob.context.should be_nil
-      end
-    end
-  end
-
-  describe "#update_attributes" do
-    before do
-      class PersonUpdateAttributes
-        include ActsAsRDF::Resource
-        define_type RDF::FOAF['Person']
-        
-        has_object :name, RDF::FOAF[:name], String
-        has_subjects :knows, RDF::FOAF[:knows]
-        
-        init_attribute_methods
-      end
-    end
-    it "should update attributes" do
-      person = PersonUpdateAttributes.new(@alice_uri, @context)
-      person.save
-      person.update_attributes(:name => "Alice").should be_true
-      get = PersonUpdateAttributes.find(@alice_uri, @context)
-      get.name.should eq "Alice"
-    end
   end
 end
