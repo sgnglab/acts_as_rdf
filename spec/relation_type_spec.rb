@@ -45,12 +45,11 @@ describe 'ActsAsRDF' do
         
       context "update" do
         subject do
-          @alice.name = "AAA"
           @alice.name
         end
 
         it { should be_instance_of(String) }
-        it { should == "AAA" }
+        it { should == @alice_name.to_s }
       end
     end
 
@@ -62,12 +61,11 @@ describe 'ActsAsRDF' do
 
       context "update" do
         subject do
-          @alice.age = 40
           @alice.age
         end
 
         it { should be_instance_of(Fixnum) }
-        it { should == 40 }
+        it { should == @alice_age.to_s.to_i }
       end
     end
   end

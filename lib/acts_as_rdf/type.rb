@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+
+module Spira::Type::String
+  def self.unserialize(value)
+    RDF.literal(value.to_s)
+  end
+end
+
 module ActsAsRDF
   module Resource
     module Type
