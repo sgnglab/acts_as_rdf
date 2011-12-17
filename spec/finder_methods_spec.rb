@@ -100,4 +100,52 @@ describe 'ActsAsRDF' do
       end
     end
   end
+
+  describe '.find_by_query' do
+    context "pass correct RDF::Query" do
+      it "should find" do
+        q = RDF::Query.new({:self => {RDF.type => RDF::FOAF.Person}} , {:context => @context})
+        r = PersonFind.find_by_query(q)
+        r.should have(2).items
+        r.each{|s| 
+          s.should be_an_instance_of(PersonFind)
+          s.context.should be_equal(@context)
+        }
+      end
+
+      it "should not find with noexists context" do
+        no_context = ActsAsRDF.uniq_uri
+        q = RDF::Query.new({:self => {RDF.type => RDF::FOAF.Person}} , {:context => no_context})
+        r = PersonFind.find_by_query(q)
+        r.should have(0).items
+      end
+
+      it "should find with nested query" do
+        q = RDF::Query.new({:bob => {RDF::FOAF.name => @bob_name, RDF::FOAF.knows => :self}} , {:context => @context})
+        r = PersonFind.find_by_query(q)
+        r.should have(1).items
+        r.first.uri.should == @alice_uri
+      end
+
+      it "find resource only RDF::type of Class" do
+        ActsAsRDF.repository << [RDF::URI.new('http://i.am.a.cat/'), RDF::FOAF.name, @alice_name, @context]
+        q = RDF::Query.new({:self => {RDF::FOAF.name => @alice_name}} , {:context => @context})
+        r = PersonFind.find_by_query(q)
+        r.should have(1).items
+        r.first.uri.should == @alice_uri
+      end
+    end
+
+    context "pass incorrect RDF::Query" do
+      it "has empty query" do
+        q = RDF::Query.new()
+        expect{ PersonFind.find_by_query(q) }.to raise_error
+      end
+
+      it "does not have :self" do
+        q = RDF::Query.new({ :foo => {RDF::FOAF.name => "Alice"}} , {:context => @context})
+        expect{ PersonFind.find_by_query(q) }.to raise_error
+      end
+    end
+  end
 end

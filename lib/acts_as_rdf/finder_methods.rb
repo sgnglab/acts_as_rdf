@@ -20,6 +20,20 @@ module ActsAsRDF
             found
           end
         end
+
+        # レポジトリ内をRDF::Queryで検索する
+        # 
+        # @param [RDF::Query] query
+        # @pretrn [Array<Object>]
+        def find_by_query(query)
+          raise unless query.patterns.any?{|pattern| pattern.variables[:self] } 
+          query.pattern([:self, RDF.type, type])
+          query.execute(ActsAsRDF.repository).map{|solution|
+            found = self.new(solution.self, query.options[:context])
+            found.load
+            found
+          }
+        end
         
         # このクラスのインスタンスをレポジトリから検索する
         # URIをエンコードしたIDをもとに検索を行う
