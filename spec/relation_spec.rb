@@ -119,7 +119,7 @@ describe 'ActsAsRDF' do
         include ActsAsRDF::Resource
         
         define_type RDF::FOAF['Person']
-        has_object :name, RDF::FOAF.name, String
+        has_object :name, RDF::FOAF.name, RDF::Literal
         has_object :homepage, RDF::FOAF.homepage
         has_object :person, RDF::FOAF.knows, 'PersonHO'
 
@@ -129,7 +129,7 @@ describe 'ActsAsRDF' do
     end
 
     context 'when getting object' do
-      it "should return a correct literal" do  
+      it "should return a correct literal" do
         @alice.name.should be_instance_of(String)
         @alice.name.should be_equal(@alice_name.to_s)
       end

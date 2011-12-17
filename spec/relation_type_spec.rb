@@ -8,8 +8,8 @@ describe 'ActsAsRDF' do
       include ActsAsRDF::Resource
       
       define_type RDF::FOAF['Person']
-      has_object :name, RDF::FOAF[:name], Spira::Types::String
-      has_object :age, RDF::FOAF[:age], Spira::Types::Integer
+      has_object :name, RDF::FOAF[:name], RDF::Literal
+      has_object :age, RDF::FOAF[:age], RDF::Literal::Integer
       
       init_attribute_methods
     end
@@ -37,7 +37,7 @@ describe 'ActsAsRDF' do
   context 'with relation type' do
     before { @alice = PersonT.find(@alice_uri, @context) }
 
-    describe Spira::Types::String do
+    describe RDF::Literal do
       subject { @alice.name }
 
       it { should be_instance_of(String) }
@@ -53,7 +53,7 @@ describe 'ActsAsRDF' do
       end
     end
 
-    describe Spira::Types::Integer do
+    describe RDF::Literal::Integer do
       subject { @alice.age }
 
       it { should be_instance_of(Fixnum) }
