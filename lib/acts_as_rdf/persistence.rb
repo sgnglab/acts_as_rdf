@@ -31,7 +31,7 @@ module ActsAsRDF
         end
       end
 
-      module InstanceMethods
+      #module InstanceMethods
         # 永続するデータかどうかの確認
         # 
         # @return [true]
@@ -112,7 +112,7 @@ module ActsAsRDF
           save
         end
 
-      end
+      #end
     end
   end
 end

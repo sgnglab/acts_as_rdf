@@ -30,14 +30,14 @@ module ActsAsRDF
         end
       end
 
-      module InstanceMethods
+      #module InstanceMethods
         # URIを16進文字列で表現した文字列を返す
         #
         # @return [String]
         def encode_uri
           self.class.encode_uri(uri)
         end
-      end
+      #end
     end
   end
 end

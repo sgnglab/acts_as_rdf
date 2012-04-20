@@ -57,7 +57,7 @@ module ActsAsRDF
       end
     end
     
-    module InstanceMethods
+    #module InstanceMethods
       # インスタンスを生成する
       #      project_one = RDF::URI.new('http://project.com/one')
       #      context = RDF::URI.new('http://project.com/)
@@ -112,7 +112,7 @@ module ActsAsRDF
         ActsAsRDF.repository
       end
       
-    end
+    #end
   end
 end
 

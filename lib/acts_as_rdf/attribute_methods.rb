@@ -114,7 +114,7 @@ module ActsAsRDF
         end
       end
 
-      module InstanceMethods
+      #module InstanceMethods
         # 属性(関連)名の一覧を返す
         # 
         # @param [Array<Symbol>] 属性名の一覧
@@ -196,7 +196,7 @@ module ActsAsRDF
         def _set_attr(attr_name, arg)
           @attr[attr_name] = arg
         end
-      end
+      #end
     end
   end
 end

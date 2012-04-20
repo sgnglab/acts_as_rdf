@@ -3,7 +3,7 @@ module ActsAsRDF
   module Resource
     module Type
       extend ActiveSupport::Concern
-      module InstanceMethods
+      #module InstanceMethods
         # @param [Object] value
         # @param [String, Spira::Type] type
         # @param [Boolean] persisted 
@@ -44,7 +44,7 @@ module ActsAsRDF
             value
           end
         end
-      end
+      #end
     end
   end
 end

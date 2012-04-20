@@ -58,8 +58,8 @@ module ActsAsRDF
         end
       end
       
-      module InstanceMethods
-      end
+      #module InstanceMethods
+      #end
     end
   end
 end
